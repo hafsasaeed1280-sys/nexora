@@ -1,400 +1,1463 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexora | Smart Assistant</title>
+<meta name="theme-color" content="#0b0b12">
+<meta name="description" content="Nexora - your smart digital workspace for profiles, tasks, notes, messages and focus.">
+<title>Nexora | Smart Digital Workspace</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
 
 <style>
+:root {
+    --bg: #0b0b12;
+    --card: #171622;
+    --card2: #1e1c2c;
+    --border: #2a2740;
+    --text: #f3f1fb;
+    --muted: #a7a3bd;
+    --accent: #8b5cf6;
+    --accent2: #6366f1;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    --radius: 16px;
+}
+
+[data-theme="light"] {
+    --bg: #f5f4fb;
+    --card: #ffffff;
+    --card2: #f3f1fb;
+    --border: #e3e0f2;
+    --text: #1c1a2e;
+    --muted: #6b6785;
+    --shadow: 0 10px 30px rgba(90, 70, 160, .12);
+}
+
 * { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0b0b12;
-    color: white;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background .25s, color .25s;
 }
 
-header {
-    padding: 22px 7%;
-    border-bottom: 1px solid #292638;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+h1, h2, h3 { margin: 0 0 8px; line-height: 1.25; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; }
+p { color: var(--muted); margin: 0 0 14px; }
+small { color: var(--muted); }
 
-header h2 { color: #a78bfa; margin: 0; }
-
-main {
-    width: 86%;
-    max-width: 1000px;
-    margin: 45px auto;
-}
-
-p { color: #c5c2d5; line-height: 1.6; }
-
-.cards {
+/* ---------- Layout ---------- */
+.app {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
 }
 
-.card, .panel {
-    background: #171622;
-    border: 1px solid #302c43;
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 20px;
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 22px 16px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-h3 { color: #c4b5fd; }
-
-button {
-    padding: 12px 16px;
-    background: #8b5cf6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.card button { width: 100%; }
-
-input, textarea {
-    display: block;
-    width: 100%;
-    margin: 8px 0 16px;
-    padding: 12px;
-    border-radius: 7px;
-    border: 1px solid #403a55;
-    background: #0f0e18;
-    color: white;
-}
-
-.panel { display: none; }
-
-#result {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    margin-top: 18px;
-}
-
-footer {
-    text-align: center;
-    color: #777387;
-    padding: 25px;
-}
-#taskList { list-style: none; padding: 0; margin: 0; }
-
-#taskList li {
+.brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #0f0e18;
-    border: 1px solid #302c43;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
+    padding: 6px 10px 20px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: .3px;
 }
 
-#taskList li input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin: 0;
+.logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(139, 92, 246, .45);
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 12px;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    border-radius: 11px;
+    font-size: .97rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+
+.nav-btn .ic { font-size: 1.15rem; width: 24px; text-align: center; }
+.nav-btn:hover { background: var(--card2); color: var(--text); }
+
+.nav-btn.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, .25), rgba(99, 102, 241, .18));
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.side-foot { margin-top: auto; padding: 10px; font-size: .8rem; color: var(--muted); }
+
+.content { padding: 28px clamp(16px, 4vw, 44px) 60px; max-width: 1100px; width: 100%; }
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.topbar h1 { margin: 0; }
+.date-chip {
+    font-size: .85rem;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 7px 13px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.view { display: none; animation: rise .3s ease; }
+.view.active { display: block; }
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---------- Components ---------- */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.grid2 .card { margin-bottom: 0; }
+
+.hero {
+    background: linear-gradient(135deg, rgba(139, 92, 246, .30), rgba(99, 102, 241, .14)), var(--card);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hero h1 { font-size: 1.7rem; }
+.hero p { margin: 0; max-width: 520px; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+}
+
+.stat .num { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+.stat .lbl { color: var(--muted); font-size: .88rem; margin-top: 4px; }
+.stat .ico { font-size: 1.3rem; margin-bottom: 6px; }
+
+.btn {
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    font-size: .93rem;
+    cursor: pointer;
+    transition: transform .1s, filter .15s, background .15s;
+}
+
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: scale(.97); }
+
+.btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn.danger { color: var(--danger); border-color: rgba(239, 68, 68, .45); }
+.btn.ghost { background: transparent; }
+.btn.small { padding: 7px 11px; font-size: .84rem; }
+
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+label { display: block; font-size: .87rem; font-weight: 600; margin: 12px 0 6px; }
+
+input, textarea, select {
+    width: 100%;
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: .95rem;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, .22);
+}
+
+textarea { resize: vertical; min-height: 100px; }
+
+.inline { display: flex; gap: 8px; align-items: center; }
+
+.icon-btn {
     flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--muted);
     cursor: pointer;
 }
 
-#taskList .task-text {
-    flex: 1;
-    overflow-wrap: anywhere;
+.icon-btn:hover { color: var(--text); border-color: var(--accent); }
+
+.meter { height: 8px; background: var(--card2); border-radius: 99px; overflow: hidden; margin-top: 18px; }
+.meter > div {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width .4s ease;
 }
 
-#taskList li.done .task-text {
-    text-decoration: line-through;
-    color: #777387;
+.filled { animation: flash .9s ease; }
+@keyframes flash {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .7); border-color: var(--ok); }
+    100% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
 }
 
-#taskList li button {
+/* ---------- Tasks ---------- */
+.task-add {
+    display: grid;
+    grid-template-columns: 1fr 140px 160px auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.task-add label { margin-top: 0; }
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0 12px;
+}
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chip {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .86rem;
+}
+
+.chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.search { max-width: 220px; padding: 8px 12px; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+
+.task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.task input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
     margin: 0;
-    padding: 8px 12px;
-    background: #3b2a5e;
+    padding: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
 }
 
-#taskCount { color: #a78bfa; font-size: 14px; }
+.t-main { flex: 1; min-width: 0; }
+.t-text { overflow-wrap: anywhere; }
+.task.done .t-text { text-decoration: line-through; color: var(--muted); }
+
+.t-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+
+.badge {
+    font-size: .74rem;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+}
+
+.badge.high { color: var(--danger); border-color: rgba(239, 68, 68, .5); }
+.badge.medium { color: var(--warn); border-color: rgba(245, 158, 11, .5); }
+.badge.low { color: var(--ok); border-color: rgba(34, 197, 94, .5); }
+.badge.overdue { background: rgba(239, 68, 68, .15); color: var(--danger); border-color: rgba(239, 68, 68, .5); }
+
+.empty {
+    text-align: center;
+    padding: 28px 10px;
+    color: var(--muted);
+}
+
+.empty .big { font-size: 2.2rem; display: block; margin-bottom: 6px; }
+
+.mini-list { list-style: none; margin: 0; padding: 0; }
+.mini-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+.mini-list li:last-child { border-bottom: none; }
+
+.tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.tool {
+    padding: 14px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: .92rem;
+}
+.tool:hover { border-color: var(--accent); }
+.tool span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+
+/* ---------- Notes ---------- */
+.notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.note {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--shadow);
+}
+
+.note h3 { margin: 0; overflow-wrap: anywhere; }
+.note .body { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); font-size: .92rem; flex: 1; }
+.note .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---------- Writer ---------- */
+.output { min-height: 280px; font-family: inherit; }
+
+/* ---------- Focus ---------- */
+.timer-wrap { text-align: center; }
+.ring-box { position: relative; width: 240px; height: 240px; margin: 10px auto 20px; }
+.ring { width: 100%; height: 100%; }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+.ring-fg {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 565.49;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset .5s linear;
+}
+.time {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.modes { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.timer-wrap .row { justify-content: center; }
+
+/* ---------- Toast ---------- */
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s;
+    z-index: 50;
+    max-width: 90vw;
+}
+
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+
+    .sidebar {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 66px;
+        z-index: 40;
+        flex-direction: row;
+        padding: 8px;
+        gap: 4px;
+        overflow-x: auto;
+        border-right: none;
+        border-top: 1px solid var(--border);
+    }
+
+    .brand, .side-foot { display: none; }
+
+    .nav-btn {
+        flex-direction: column;
+        gap: 2px;
+        min-width: 66px;
+        padding: 6px 8px;
+        font-size: .68rem;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .nav-btn.active { box-shadow: none; }
+    .content { padding-bottom: 100px; }
+    .task-add { grid-template-columns: 1fr 1fr; }
+    .task-add .wide { grid-column: 1 / -1; }
+    h1 { font-size: 1.5rem; }
+    .hero h1 { font-size: 1.4rem; }
+    .date-chip { display: none; }
+}
 </style>
 </head>
 
 <body>
-<header>
-    <h2>Nexora</h2>
-    <span>Your digital workspace</span>
-</header>
+<div class="app">
 
-<main>
-    <h1>Welcome to Nexora 👋</h1>
-    <p>Your everyday digital tasks, organised in one place.</p>
+    <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand"><div class="logo">N</div> Nexora</div>
+        <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span>Dashboard</button>
+        <button class="nav-btn" data-view="profile"><span class="ic">👤</span>Smart Profile</button>
+        <button class="nav-btn" data-view="tasks"><span class="ic">✅</span>Tasks</button>
+        <button class="nav-btn" data-view="notes"><span class="ic">📝</span>Notes</button>
+        <button class="nav-btn" data-view="writer"><span class="ic">✉️</span>Writer</button>
+        <button class="nav-btn" data-view="focus"><span class="ic">⏱️</span>Focus</button>
+        <button class="nav-btn" data-view="settings"><span class="ic">⚙️</span>Settings</button>
+        <div class="side-foot">© 2026 Nexora<br>Made with ❤️</div>
+    </aside>
 
-    <section class="cards">
-        <div class="card">
-            <h3>Smart Forms</h3>
-            <p>Organise your details for online forms.</p>
-            <button onclick="openPanel('forms')">Open Smart Forms</button>
+    <main class="content">
+        <div class="topbar">
+            <h1 id="pageTitle">Dashboard</h1>
+            <span class="date-chip" id="dateChip"></span>
         </div>
 
-        <div class="card">
-            <h3>AI Assistant</h3>
-            <p>Prepare ideas and everyday messages.</p>
-            <button onclick="openPanel('ai')">Open AI Assistant</button>
-        </div>
+        <!-- Dashboard -->
+        <section class="view" id="view-dashboard">
+            <div class="card hero">
+                <div>
+                    <h1 id="greet">Welcome</h1>
+                    <p id="heroSub">Your everyday digital tasks, organised in one place.</p>
+                </div>
+                <div class="row" style="margin:0">
+                    <button class="btn primary" data-go="tasks">+ New task</button>
+                    <button class="btn" data-go="writer">Write a message</button>
+                </div>
+            </div>
 
-        <div class="card">
-            <h3>My Tasks</h3>
-            <p>Write and organise your tasks.</p>
-            <button onclick="openPanel('tasks')">Open My Tasks</button>
-        </div>
-      
-    </section>
+            <div class="stats" id="stats"></div>
 
-    <section class="panel" id="forms">
-        <h2>Smart Forms</h2>
-        <p>Enter your details to prepare a reusable profile.</p>
+            <div class="grid2">
+                <div class="card">
+                    <h3>Up next</h3>
+                    <ul class="mini-list" id="upNext"></ul>
+                </div>
+                <div class="card">
+                    <h3>Quick tools</h3>
+                    <div class="tools">
+                        <button class="tool" data-go="profile"><span>👤</span>Smart Profile</button>
+                        <button class="tool" data-go="notes"><span>📝</span>Quick Notes</button>
+                        <button class="tool" data-go="writer"><span>✉️</span>Message Writer</button>
+                        <button class="tool" data-go="focus"><span>⏱️</span>Focus Timer</button>
+                    </div>
+                    <p id="profileTip" style="margin:14px 0 0"></p>
+                </div>
+            </div>
+        </section>
 
-        <form id="profileForm">
-            <label>Full name</label>
-            <input id="fullName" required maxlength="100"
-                   placeholder="Enter your name">
+        <!-- Smart Profile -->
+        <section class="view" id="view-profile">
+            <div class="grid2">
+                <div class="card">
+                    <h2>My Profile</h2>
+                    <p>Save your details once and reuse them anywhere. Tap the copy button next to any field.</p>
+                    <form id="profileForm">
+                        <div id="profileFields"></div>
+                        <div class="row">
+                            <button class="btn primary" type="submit">Save profile</button>
+                            <button class="btn" type="button" id="copyAll">Copy all details</button>
+                            <button class="btn ghost danger" type="button" id="clearProfile">Clear</button>
+                        </div>
+                    </form>
+                    <div class="meter"><div id="meterBar"></div></div>
+                    <small id="meterText"></small>
+                </div>
 
-            <label>Email</label>
-            <input id="email" type="email" required
-                   placeholder="Enter your email">
+                <div class="card">
+                    <h2>Try Smart Autofill</h2>
+                    <p>This sample form shows how Nexora fills details from your saved profile.</p>
+                    <div id="demoFields"></div>
+                    <div class="row">
+                        <button class="btn primary" type="button" id="autofillBtn">Autofill from saved profile</button>
+                        <button class="btn" type="button" id="demoReset">Reset form</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <label>Phone (optional)</label>
-            <input id="phone" type="tel" maxlength="30"
-                   placeholder="Enter your phone number">
+        <!-- Tasks -->
+        <section class="view" id="view-tasks">
+            <div class="card">
+                <form id="taskForm" class="task-add">
+                    <div class="wide">
+                        <label for="taskInput">New task</label>
+                        <input id="taskInput" required maxlength="200" placeholder="e.g. Complete my application">
+                    </div>
+                    <div>
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taskDue">Due date</label>
+                        <input id="taskDue" type="date">
+                    </div>
+                    <button class="btn primary" type="submit">Add</button>
+                </form>
+            </div>
 
-            <button type="submit">Prepare My Details</button>
-            <button type="button" onclick="saveProfile()">
-    Save My Profile
-</button>
+            <div class="card">
+                <div class="meter" style="margin:0 0 6px"><div id="taskBar"></div></div>
+                <small id="taskCount"></small>
 
-<button type="button" onclick="loadProfile()">
-    Load Saved Profile
-</button>
-        </form>
+                <div class="toolbar">
+                    <div class="chips" id="taskFilters">
+                        <button class="chip active" data-filter="all">All</button>
+                        <button class="chip" data-filter="active">Active</button>
+                        <button class="chip" data-filter="done">Done</button>
+                    </div>
+                    <input class="search" id="taskSearch" type="search" placeholder="Search tasks…" aria-label="Search tasks">
+                </div>
 
-        <div id="result"></div>
-        <button id="copyBtn" hidden onclick="copyDetails()">
-            Copy Details
-        </button> 
-        <hr>
-        <h3>Try Smart Autofill</h3>
-        <p>Load your saved profile into this sample form.</p>
+                <ul class="list" id="taskList"></ul>
+                <div class="row">
+                    <button class="btn" id="clearDone" type="button">Clear completed</button>
+                </div>
+            </div>
+        </section>
 
-        <label>Full name</label>
-        <input id="autoName" placeholder="Autofilled name">
+        <!-- Notes -->
+        <section class="view" id="view-notes">
+            <div class="card">
+                <h2 id="noteFormTitle">New note</h2>
+                <form id="noteForm">
+                    <label for="noteTitle">Title</label>
+                    <input id="noteTitle" maxlength="80" placeholder="Note title">
+                    <label for="noteBody">Note</label>
+                    <textarea id="noteBody" maxlength="4000" placeholder="Write anything you want to remember…"></textarea>
+                    <div class="row">
+                        <button class="btn primary" type="submit" id="noteSave">Save note</button>
+                        <button class="btn" type="button" id="noteCancel" hidden>Cancel edit</button>
+                    </div>
+                </form>
+            </div>
+            <div class="notes" id="notesGrid"></div>
+        </section>
 
-        <label>Email</label>
-        <input id="autoEmail" type="email" placeholder="Autofilled email">
+        <!-- Message Writer -->
+        <section class="view" id="view-writer">
+            <div class="grid2">
+                <div class="card">
+                    <h2>Message Writer</h2>
+                    <p>Pick a template, fill in a few details, and Nexora prepares a ready-to-send message using your profile.</p>
+                    <label for="tplSelect">Template</label>
+                    <select id="tplSelect"></select>
+                    <div id="tplFields"></div>
+                    <p id="writerHint" style="margin-top:14px"></p>
+                </div>
+                <div class="card">
+                    <h3>Your message</h3>
+                    <textarea id="writerOut" class="output" aria-label="Generated message"></textarea>
+                    <div class="row">
+                        <button class="btn primary" id="writerCopy" type="button">Copy message</button>
+                        <button class="btn" id="writerMail" type="button">Open in email</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <label>Phone</label>
-        <input id="autoPhone" type="tel" placeholder="Autofilled phone">
+        <!-- Focus -->
+        <section class="view" id="view-focus">
+            <div class="grid2">
+                <div class="card timer-wrap">
+                    <h2>Focus Timer</h2>
+                    <p>Work in short, focused sessions with breaks in between.</p>
+                    <div class="modes" id="modes">
+                        <button class="chip active" data-mode="focus">Focus 25</button>
+                        <button class="chip" data-mode="short">Short break 5</button>
+                        <button class="chip" data-mode="long">Long break 15</button>
+                    </div>
+                    <div class="ring-box">
+                        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+                            <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
+                            <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="90" transform="rotate(-90 100 100)"></circle>
+                        </svg>
+                        <div class="time" id="timeText" role="timer">25:00</div>
+                    </div>
+                    <div class="row">
+                        <button class="btn primary" id="timerStart" type="button">Start</button>
+                        <button class="btn" id="timerReset" type="button">Reset</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Today</h3>
+                    <div class="stat" style="box-shadow:none;margin-top:10px">
+                        <div class="ico">🔥</div>
+                        <div class="num" id="sessionsToday">0</div>
+                        <div class="lbl">focus sessions completed today</div>
+                    </div>
+                    <p style="margin-top:16px">Tip: pick one task from your list, start the timer, and keep your phone away until it rings.</p>
+                </div>
+            </div>
+        </section>
 
-        <button type="button" onclick="autofillDemo()">
-            Autofill From Saved Profile
-        </button>
-    </section>
+        <!-- Settings -->
+        <section class="view" id="view-settings">
+            <div class="card">
+                <h2>Appearance</h2>
+                <p>Choose how Nexora looks.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn" id="themeDark" type="button">🌙 Dark</button>
+                    <button class="btn" id="themeLight" type="button">☀️ Light</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Your data</h2>
+                <p>Everything is stored privately in this browser. Use a backup to move your data to another device or keep it safe.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="exportBtn" type="button">Download backup</button>
+                    <button class="btn" id="importBtn" type="button">Restore from backup</button>
+                    <button class="btn danger" id="resetBtn" type="button">Delete all data</button>
+                </div>
+                <input type="file" id="importFile" accept="application/json" hidden>
+            </div>
+            <div class="card">
+                <h2>About Nexora</h2>
+                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, a message writer and a focus timer, all in one place.</p>
+            </div>
+        </section>
+    </main>
+</div>
 
-    <section class="panel" id="ai">
-        <h2>AI Assistant</h2>
-        <p>AI features will be connected in a later development step.</p>
-    </section>
-
-       <section class="panel" id="tasks">
-        <h2>My Tasks</h2>
-        <form id="taskForm">
-            <label>Write a task</label>
-            <input id="taskInput" required maxlength="200"
-                   placeholder="e.g. Complete an application">
-            <button type="submit">Add Task</button>
-            <button type="button" onclick="clearDoneTasks()">Clear Completed</button>
-        </form>
-        <p id="taskCount"></p>
-        <ul id="taskList"></ul>
-    </section>
-</main>
-
-<footer>© 2026 Nexora</footer>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-function openPanel(id) {
-    document.querySelectorAll(".panel").forEach(panel => {
-        panel.style.display = "none";
-    });
+"use strict";
 
-    document.getElementById(id).style.display = "block";
-    document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+/* ============ Helpers ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+function h(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    for (const k in (attrs || {})) {
+        const v = attrs[k];
+        if (v == null || v === false) continue;
+        if (k === "class") e.className = v;
+        else if (k === "text") e.textContent = v;
+        else if (k === "value" || k === "checked" || k === "disabled") e[k] = v;
+        else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+        else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of kids.flat()) {
+        if (c == null || c === false) continue;
+        e.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    }
+    return e;
 }
 
-let preparedDetails = "";
+const store = {
+    get(key, fallback) {
+        try {
+            const v = JSON.parse(localStorage.getItem(key));
+            return v === null || v === undefined ? fallback : v;
+        } catch { return fallback; }
+    },
+    set(key, val) {
+        try { localStorage.setItem(key, JSON.stringify(val)); }
+        catch { toast("Could not save (storage is full or blocked)"); }
+    }
+};
 
-document.getElementById("profileForm").addEventListener("submit", function(event) {
-    event.preventDefault();
+let toastTimer;
+function toast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
 
-    const name = document.getElementById("fullName").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        toast("Copied!");
+    } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.append(ta);
+        ta.select();
+        try { document.execCommand("copy"); toast("Copied!"); }
+        catch { toast("Copy is not available here"); }
+        ta.remove();
+    }
+}
 
-    preparedDetails =
-        "Full name: " + name +
-        "\nEmail: " + email +
-        "\nPhone: " + (phone || "Not provided");
+const todayStr = () => new Date().toLocaleDateString("en-CA");
 
-    document.getElementById("result").textContent =
-        "Your details are ready to copy:\n\n" + preparedDetails;
+function fmtDate(s) {
+    if (!s) return "[date]";
+    const d = new Date(s + "T00:00:00");
+    return isNaN(d) ? "[date]" : d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
 
-    document.getElementById("copyBtn").hidden = false;
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+/* ============ Data ============ */
+const FIELDS = [
+    { id: "name", label: "Full name", type: "text", ph: "Your full name", req: true },
+    { id: "email", label: "Email", type: "email", ph: "name@example.com", req: true },
+    { id: "phone", label: "Phone", type: "tel", ph: "+92 300 0000000" },
+    { id: "address", label: "Address", type: "text", ph: "House / street / area" },
+    { id: "city", label: "City", type: "text", ph: "Your city" },
+    { id: "dob", label: "Date of birth", type: "date" },
+    { id: "education", label: "Education", type: "text", ph: "e.g. BS Computer Science" },
+    { id: "linkedin", label: "LinkedIn / website", type: "url", ph: "https://" }
+];
+
+function getProfile() {
+    const p = store.get("nexoraProfile", {});
+    return p && typeof p === "object" && !Array.isArray(p) ? p : {};
+}
+
+function getTasks() {
+    const t = store.get("nexoraTasks", []);
+    return Array.isArray(t) ? t.filter(x => x && typeof x.text === "string") : [];
+}
+
+function getNotes() {
+    const n = store.get("nexoraNotes", []);
+    return Array.isArray(n) ? n.filter(x => x && typeof x === "object") : [];
+}
+
+const getSessions = () => {
+    const s = store.get("nexoraSessions", {});
+    return s && typeof s === "object" && !Array.isArray(s) ? s : {};
+};
+
+let tasks = getTasks();
+let notes = getNotes();
+
+/* ============ Navigation ============ */
+const TITLES = {
+    dashboard: "Dashboard", profile: "Smart Profile", tasks: "Tasks",
+    notes: "Notes", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
+};
+
+function go(view) {
+    if (!TITLES[view]) view = "dashboard";
+    $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + view));
+    $$(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    $("#pageTitle").textContent = TITLES[view];
+    if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
+    window.scrollTo({ top: 0 });
+    if (view === "dashboard") renderDashboard();
+    if (view === "profile") renderProfileMeter();
+    if (view === "writer") generateMessage();
+    if (view === "focus") renderSessions();
+}
+
+$$(".nav-btn").forEach(b => b.addEventListener("click", () => go(b.dataset.view)));
+document.addEventListener("click", e => {
+    const t = e.target.closest("[data-go]");
+    if (t) go(t.dataset.go);
+});
+window.addEventListener("hashchange", () => go(location.hash.slice(1)));
+
+/* ============ Theme ============ */
+function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    $('meta[name="theme-color"]').setAttribute("content", t === "light" ? "#f5f4fb" : "#0b0b12");
+    store.set("nexoraTheme", t);
+}
+$("#themeDark").addEventListener("click", () => applyTheme("dark"));
+$("#themeLight").addEventListener("click", () => applyTheme("light"));
+applyTheme(store.get("nexoraTheme", "dark") === "light" ? "light" : "dark");
+
+/* ============ Dashboard ============ */
+function renderDashboard() {
+    const p = getProfile();
+    const hr = new Date().getHours();
+    const part = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
+    const first = (p.name || "").trim().split(/\s+/)[0];
+    $("#greet").textContent = part + (first ? ", " + first : "") + " 👋";
+
+    const pending = tasks.filter(t => !t.done).length;
+    const done = tasks.filter(t => t.done).length;
+    const sess = getSessions()[todayStr()] || 0;
+
+    $("#heroSub").textContent = pending === 0
+        ? "You have no pending tasks. Add one, or enjoy the calm!"
+        : "You have " + pending + " pending task" + (pending === 1 ? "" : "s") + ". Let's get them done.";
+
+    const stats = [
+        ["📌", pending, "Pending tasks"],
+        ["✅", done, "Completed"],
+        ["📝", notes.length, "Notes saved"],
+        ["🔥", sess, "Focus sessions today"]
+    ];
+    const box = $("#stats");
+    box.replaceChildren(...stats.map(s =>
+        h("div", { class: "stat" },
+            h("div", { class: "ico", text: s[0] }),
+            h("div", { class: "num", text: s[1] }),
+            h("div", { class: "lbl", text: s[2] }))
+    ));
+
+    const up = $("#upNext");
+    const next = sortTasks(tasks.filter(t => !t.done)).slice(0, 4);
+    up.replaceChildren(...(next.length
+        ? next.map(t => h("li", {},
+            h("span", { text: t.text, style: "overflow-wrap:anywhere" }),
+            h("span", { class: "badge " + (t.priority || "medium"), text: t.due ? fmtDate(t.due) : (t.priority || "medium") })))
+        : [h("li", {}, h("span", { text: "Nothing pending right now 🎉" }))]));
+
+    const pct = profileCompleteness();
+    $("#profileTip").textContent = pct < 100
+        ? "Tip: your profile is " + pct + "% complete. Fill it in to save time on forms and messages."
+        : "Your profile is complete. Nice work!";
+}
+
+/* ============ Smart Profile ============ */
+function profileCompleteness() {
+    const p = getProfile();
+    const filled = FIELDS.filter(f => String(p[f.id] || "").trim()).length;
+    return Math.round((filled / FIELDS.length) * 100);
+}
+
+function renderProfileMeter() {
+    const pct = profileCompleteness();
+    $("#meterBar").style.width = pct + "%";
+    $("#meterText").textContent = "Profile " + pct + "% complete";
+}
+
+function buildProfileForm() {
+    const p = getProfile();
+    const box = $("#profileFields");
+    box.replaceChildren(...FIELDS.map(f =>
+        h("div", {},
+            h("label", { for: "pf-" + f.id, text: f.label + (f.req ? "" : " (optional)") }),
+            h("div", { class: "inline" },
+                h("input", {
+                    id: "pf-" + f.id, type: f.type, placeholder: f.ph || "",
+                    maxlength: f.type === "date" ? null : "150",
+                    required: f.req ? true : null, value: p[f.id] || "", autocomplete: "off"
+                }),
+                h("button", {
+                    type: "button", class: "icon-btn", title: "Copy " + f.label,
+                    "aria-label": "Copy " + f.label, text: "⧉",
+                    onclick: () => {
+                        const v = $("#pf-" + f.id).value.trim();
+                        v ? copyText(v) : toast("Nothing to copy yet");
+                    }
+                })))
+    ));
+}
+
+function readProfileForm() {
+    const p = {};
+    FIELDS.forEach(f => { p[f.id] = $("#pf-" + f.id).value.trim(); });
+    return p;
+}
+
+$("#profileForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const p = readProfileForm();
+    if (!p.name || !p.email) { toast("Please enter your name and email"); return; }
+    store.set("nexoraProfile", p);
+    renderProfileMeter();
+    toast("Profile saved ✔");
 });
 
-async function copyDetails() {
-    try {
-        await navigator.clipboard.writeText(preparedDetails);
-        alert("Details copied!");
-    } catch {
-        alert("Copy is unavailable here. Select the displayed details and copy them manually.");
-    }
+$("#copyAll").addEventListener("click", () => {
+    const p = readProfileForm();
+    const lines = FIELDS.filter(f => p[f.id]).map(f => f.label + ": " + (f.type === "date" ? fmtDate(p[f.id]) : p[f.id]));
+    lines.length ? copyText(lines.join("\n")) : toast("Fill in your details first");
+});
+
+$("#clearProfile").addEventListener("click", () => {
+    if (!confirm("Clear your saved profile?")) return;
+    localStorage.removeItem("nexoraProfile");
+    buildProfileForm();
+    renderProfileMeter();
+    toast("Profile cleared");
+});
+
+const DEMO = ["name", "email", "phone", "address"];
+
+function buildDemo() {
+    $("#demoFields").replaceChildren(...DEMO.map(id => {
+        const f = FIELDS.find(x => x.id === id);
+        return h("div", {},
+            h("label", { for: "demo-" + id, text: f.label }),
+            h("input", { id: "demo-" + id, type: f.type, placeholder: "Autofilled " + f.label.toLowerCase() }));
+    }));
 }
 
-/* ---------- Task Manager ---------- */
+$("#autofillBtn").addEventListener("click", () => {
+    const p = getProfile();
+    if (!p.name && !p.email) { toast("Save your profile first"); return; }
+    DEMO.forEach(id => {
+        const el = $("#demo-" + id);
+        el.value = p[id] || "";
+        el.classList.remove("filled");
+        void el.offsetWidth;
+        el.classList.add("filled");
+    });
+    toast("Autofill completed ✔");
+});
 
-let tasks = [];
+$("#demoReset").addEventListener("click", buildDemo);
 
-function loadTasks() {
-    try {
-        const saved = JSON.parse(localStorage.getItem("nexoraTasks"));
-        tasks = Array.isArray(saved) ? saved : [];
-    } catch {
-        tasks = [];
-    }
-}
+/* ============ Tasks ============ */
+const RANK = { high: 0, medium: 1, low: 2 };
+let taskFilter = "all";
 
-function saveTasks() {
-    localStorage.setItem("nexoraTasks", JSON.stringify(tasks));
+function saveTasks() { store.set("nexoraTasks", tasks); }
+
+function sortTasks(list) {
+    return list.slice().sort((a, b) => {
+        if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+        const ad = a.due || "9999-99-99", bd = b.due || "9999-99-99";
+        if (ad !== bd) return ad < bd ? -1 : 1;
+        return (RANK[a.priority] ?? 1) - (RANK[b.priority] ?? 1);
+    });
 }
 
 function renderTasks() {
-    const list = document.getElementById("taskList");
-    list.innerHTML = "";
+    const q = $("#taskSearch").value.trim().toLowerCase();
+    let items = tasks.slice();
+    if (taskFilter === "active") items = items.filter(t => !t.done);
+    if (taskFilter === "done") items = items.filter(t => t.done);
+    if (q) items = items.filter(t => t.text.toLowerCase().includes(q));
+    items = sortTasks(items);
 
-    tasks.forEach(task => {
-        const item = document.createElement("li");
-        if (task.done) item.classList.add("done");
+    const list = $("#taskList");
+    if (!items.length) {
+        list.replaceChildren(h("li", { class: "empty" },
+            h("span", { class: "big", text: tasks.length ? "🔍" : "🌱" }),
+            tasks.length ? "No tasks match this view." : "No tasks yet. Add your first one above."));
+    } else {
+        const today = todayStr();
+        list.replaceChildren(...items.map(t => {
+            const overdue = !t.done && t.due && t.due < today;
+            const meta = h("div", { class: "t-meta" },
+                h("span", { class: "badge " + (t.priority || "medium"), text: t.priority || "medium" }),
+                t.due ? h("span", { class: "badge" + (overdue ? " overdue" : ""), text: (overdue ? "Overdue · " : "Due ") + fmtDate(t.due) }) : null);
+            return h("li", { class: "task" + (t.done ? " done" : "") },
+                h("input", {
+                    type: "checkbox", checked: !!t.done, "aria-label": "Mark done",
+                    onchange: e => { t.done = e.target.checked; saveTasks(); renderTasks(); }
+                }),
+                h("div", { class: "t-main" }, h("div", { class: "t-text", text: t.text }), meta),
+                h("button", {
+                    class: "btn small", type: "button", text: "Edit",
+                    onclick: () => {
+                        const v = prompt("Edit task", t.text);
+                        if (v && v.trim()) { t.text = v.trim().slice(0, 200); saveTasks(); renderTasks(); }
+                    }
+                }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Remove",
+                    onclick: () => { tasks = tasks.filter(x => x.id !== t.id); saveTasks(); renderTasks(); }
+                }));
+        }));
+    }
 
-        const check = document.createElement("input");
-        check.type = "checkbox";
-        check.checked = task.done;
-        check.onchange = () => {
-            task.done = check.checked;
-            saveTasks();
-            renderTasks();
-        };
-
-        const text = document.createElement("span");
-        text.className = "task-text";
-        text.textContent = task.text;
-
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.textContent = "Remove";
-        remove.onclick = () => {
-            tasks = tasks.filter(t => t.id !== task.id);
-            saveTasks();
-            renderTasks();
-        };
-
-        item.append(check, text, remove);
-        list.appendChild(item);
-    });
-
-    const remaining = tasks.filter(t => !t.done).length;
-    document.getElementById("taskCount").textContent =
-        tasks.length === 0
-            ? "No tasks yet. Add your first one above."
-            : remaining + " of " + tasks.length + " tasks remaining";
+    const done = tasks.filter(t => t.done).length;
+    const total = tasks.length;
+    $("#taskBar").style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+    $("#taskCount").textContent = total
+        ? done + " of " + total + " tasks completed"
+        : "Add a task to start tracking progress";
 }
 
-function clearDoneTasks() {
+$("#taskForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const text = $("#taskInput").value.trim();
+    if (!text) return;
+    tasks.push({
+        id: uid(), text, done: false,
+        priority: $("#taskPriority").value,
+        due: $("#taskDue").value || ""
+    });
+    saveTasks();
+    $("#taskInput").value = "";
+    $("#taskDue").value = "";
+    $("#taskPriority").value = "medium";
+    renderTasks();
+    toast("Task added");
+});
+
+$("#clearDone").addEventListener("click", () => {
+    if (!tasks.some(t => t.done)) { toast("No completed tasks"); return; }
     tasks = tasks.filter(t => !t.done);
     saveTasks();
     renderTasks();
-}
-
-document.getElementById("taskForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    const input = document.getElementById("taskInput");
-    const text = input.value.trim();
-
-    if (!text) return;
-
-    tasks.push({ id: Date.now(), text: text, done: false });
-    saveTasks();
-    renderTasks();
-    input.value = "";
 });
 
-loadTasks();
-renderTasks();
-function saveProfile() {
-    const profile = {
-        name: document.getElementById("fullName").value.trim(),
-        email: document.getElementById("email").value.trim(),
-        phone: document.getElementById("phone").value.trim()
+$("#taskFilters").addEventListener("click", e => {
+    const b = e.target.closest("[data-filter]");
+    if (!b) return;
+    taskFilter = b.dataset.filter;
+    $$("#taskFilters .chip").forEach(c => c.classList.toggle("active", c === b));
+    renderTasks();
+});
+
+$("#taskSearch").addEventListener("input", renderTasks);
+
+/* Older tasks (saved before priorities existed) get an id so they can be edited */
+tasks.forEach(t => { if (t.id == null) t.id = uid(); });
+
+/* ============ Notes ============ */
+let editingNote = null;
+
+function saveNotes() { store.set("nexoraNotes", notes); }
+
+function renderNotes() {
+    const grid = $("#notesGrid");
+    if (!notes.length) {
+        grid.replaceChildren(h("div", { class: "card empty", style: "grid-column:1/-1" },
+            h("span", { class: "big", text: "📝" }), "No notes yet. Write your first note above."));
+        return;
+    }
+    grid.replaceChildren(...notes.slice().reverse().map(n =>
+        h("div", { class: "note" },
+            h("h3", { text: n.title || "Untitled" }),
+            h("div", { class: "body", text: n.body || "" }),
+            h("small", { text: n.date ? new Date(n.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "" }),
+            h("div", { class: "actions" },
+                h("button", { class: "btn small", type: "button", text: "Copy", onclick: () => copyText((n.title ? n.title + "\n\n" : "") + (n.body || "")) }),
+                h("button", {
+                    class: "btn small", type: "button", text: "Edit",
+                    onclick: () => {
+                        editingNote = n.id;
+                        $("#noteTitle").value = n.title || "";
+                        $("#noteBody").value = n.body || "";
+                        $("#noteFormTitle").textContent = "Edit note";
+                        $("#noteCancel").hidden = false;
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Delete",
+                    onclick: () => {
+                        if (!confirm("Delete this note?")) return;
+                        notes = notes.filter(x => x.id !== n.id);
+                        saveNotes();
+                        renderNotes();
+                    }
+                })))
+    ));
+}
+
+function resetNoteForm() {
+    editingNote = null;
+    $("#noteTitle").value = "";
+    $("#noteBody").value = "";
+    $("#noteFormTitle").textContent = "New note";
+    $("#noteCancel").hidden = true;
+}
+
+$("#noteForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("#noteTitle").value.trim();
+    const body = $("#noteBody").value.trim();
+    if (!title && !body) { toast("Write something first"); return; }
+    if (editingNote) {
+        const n = notes.find(x => x.id === editingNote);
+        if (n) { n.title = title; n.body = body; n.date = Date.now(); }
+    } else {
+        notes.push({ id: uid(), title, body, date: Date.now() });
+    }
+    saveNotes();
+    resetNoteForm();
+    renderNotes();
+    toast("Note saved ✔");
+});
+
+$("#noteCancel").addEventListener("click", resetNoteForm);
+notes.forEach(n => { if (n.id == null) n.id = uid(); });
+
+/* ============ Message Writer ============ */
+function sign(p) {
+    return ["Sincerely,", p.name || "[Your name]", p.email, p.phone].filter(Boolean).join("\n");
+}
+
+const TEMPLATES = {
+    leave: {
+        label: "Leave application",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "The Principal" },
+            { id: "reason", label: "Reason", ph: "a family function" },
+            { id: "from", label: "From date", type: "date" },
+            { id: "until", label: "To date", type: "date" }
+        ],
+        build: (p, v) => ({
+            subject: "Application for leave",
+            body: "Dear " + (v.to || "Sir/Madam") + ",\n\nI am writing to request leave from " + fmtDate(v.from) + " to " + fmtDate(v.until) +
+                " due to " + (v.reason || "personal reasons") + ". I will make sure that any missed work is completed on my return.\n\nI would be grateful if you could kindly approve my request.\n\n" + sign(p)
+        })
+    },
+    job: {
+        label: "Job application",
+        fields: [
+            { id: "to", label: "Hiring manager", ph: "Hiring Manager" },
+            { id: "role", label: "Position", ph: "Junior Web Developer" },
+            { id: "company", label: "Company", ph: "Company name" },
+            { id: "skills", label: "Key skills", ph: "HTML, CSS, JavaScript" }
+        ],
+        build: (p, v) => ({
+            subject: "Application for " + (v.role || "the open position"),
+            body: "Dear " + (v.to || "Hiring Manager") + ",\n\nI am excited to apply for the " + (v.role || "[position]") + " role at " + (v.company || "[company]") + "." +
+                (p.education ? " I hold a background in " + p.education + "," : "") +
+                " and I bring skills in " + (v.skills || "[your key skills]") + ".\n\nI am a quick learner who enjoys building useful things, and I would love the chance to contribute to your team. My details are below, and I would be happy to share more at your convenience.\n\nThank you for your time and consideration.\n\n" + sign(p) +
+                (p.linkedin ? "\n" + p.linkedin : "")
+        })
+    },
+    meeting: {
+        label: "Meeting request",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "Dear Sir/Madam" },
+            { id: "topic", label: "Topic", ph: "project discussion" },
+            { id: "date", label: "Preferred date", type: "date" }
+        ],
+        build: (p, v) => ({
+            subject: "Meeting request: " + (v.topic || "discussion"),
+            body: "Dear " + (v.to || "Sir/Madam") + ",\n\nI would like to request a short meeting to discuss " + (v.topic || "[topic]") + ". I am available on " + fmtDate(v.date) +
+                ", and I am happy to adjust to a time that suits you.\n\nPlease let me know what works best for you.\n\n" + sign(p)
+        })
+    },
+    complaint: {
+        label: "Polite complaint",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "Customer Support" },
+            { id: "issue", label: "What went wrong?", ph: "I received a damaged item" },
+            { id: "ask", label: "What do you want?", ph: "a replacement or refund" }
+        ],
+        build: (p, v) => ({
+            subject: "Complaint regarding " + (v.issue || "my recent experience"),
+            body: "Dear " + (v.to || "Sir/Madam") + ",\n\nI am writing to bring a concern to your attention: " + (v.issue || "[describe the issue]") +
+                ". I believe this can be resolved quickly, and I kindly request " + (v.ask || "[your request]") + ".\n\nI would appreciate your help and a reply at your earliest convenience.\n\n" + sign(p)
+        })
+    },
+    thanks: {
+        label: "Thank-you note",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "Dear Ali" },
+            { id: "for", label: "Thank them for", ph: "your guidance and support" }
+        ],
+        build: (p, v) => ({
+            subject: "Thank you",
+            body: (v.to || "Hello") + ",\n\nThank you so much for " + (v.for || "[what they did]") + ". It truly meant a lot to me, and I really appreciate the time and effort you gave.\n\nWith gratitude,\n" + (p.name || "[Your name]")
+        })
+    }
+};
+
+function buildWriter() {
+    const sel = $("#tplSelect");
+    sel.replaceChildren(...Object.entries(TEMPLATES).map(([k, t]) => h("option", { value: k, text: t.label })));
+    buildWriterFields();
+}
+
+function buildWriterFields() {
+    const t = TEMPLATES[$("#tplSelect").value];
+    $("#tplFields").replaceChildren(...t.fields.map(f =>
+        h("div", {},
+            h("label", { for: "wf-" + f.id, text: f.label }),
+            h("input", { id: "wf-" + f.id, type: f.type || "text", placeholder: f.ph || "", maxlength: "200", oninput: generateMessage }))
+    ));
+    generateMessage();
+}
+
+let writerSubject = "";
+
+function generateMessage() {
+    const t = TEMPLATES[$("#tplSelect").value];
+    if (!t) return;
+    const v = {};
+    t.fields.forEach(f => { const el = $("#wf-" + f.id); v[f.id] = el ? el.value.trim() : ""; });
+    const p = getProfile();
+    const out = t.build(p, v);
+    writerSubject = out.subject;
+    $("#writerOut").value = "Subject: " + out.subject + "\n\n" + out.body;
+    $("#writerHint").textContent = p.name
+        ? "Using your saved profile details."
+        : "Tip: save your Smart Profile to add your name and contact details automatically.";
+}
+
+$("#tplSelect").addEventListener("change", buildWriterFields);
+$("#writerCopy").addEventListener("click", () => copyText($("#writerOut").value));
+$("#writerMail").addEventListener("click", () => {
+    const text = $("#writerOut").value.replace(/^Subject:.*\n\n?/, "");
+    location.href = "mailto:?subject=" + encodeURIComponent(writerSubject) + "&body=" + encodeURIComponent(text);
+});
+
+/* ============ Focus Timer ============ */
+const MODES = { focus: 25 * 60, short: 5 * 60, long: 15 * 60 };
+const CIRC = 565.49;
+let mode = "focus", remaining = MODES.focus, running = false, endAt = 0, tick = null;
+
+function fmtTime(s) {
+    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+
+function renderTimer() {
+    $("#timeText").textContent = fmtTime(remaining);
+    $("#ringFg").style.strokeDashoffset = CIRC * (1 - remaining / MODES[mode]);
+    $("#timerStart").textContent = running ? "Pause" : "Start";
+    document.title = running ? fmtTime(remaining) + " · Nexora" : "Nexora | Smart Digital Workspace";
+}
+
+function renderSessions() {
+    $("#sessionsToday").textContent = getSessions()[todayStr()] || 0;
+}
+
+function beep() {
+    try {
+        const a = new (window.AudioContext || window.webkitAudioContext)();
+        const o = a.createOscillator(), g = a.createGain();
+        o.connect(g); g.connect(a.destination);
+        o.frequency.value = 880; g.gain.value = 0.08;
+        o.start();
+        setTimeout(() => { o.stop(); a.close(); }, 450);
+    } catch { /* sound is optional */ }
+}
+
+function stopTimer() { running = false; clearInterval(tick); tick = null; }
+
+function finishTimer() {
+    stopTimer();
+    remaining = MODES[mode];
+    if (mode === "focus") {
+        const s = getSessions();
+        const k = todayStr();
+        s[k] = (s[k] || 0) + 1;
+        store.set("nexoraSessions", s);
+        renderSessions();
+        toast("Great focus! Time for a break 🎉");
+    } else {
+        toast("Break over. Ready to focus?");
+    }
+    beep();
+    renderTimer();
+}
+
+$("#timerStart").addEventListener("click", () => {
+    if (running) { stopTimer(); renderTimer(); return; }
+    running = true;
+    endAt = Date.now() + remaining * 1000;
+    tick = setInterval(() => {
+        remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+        renderTimer();
+        if (remaining <= 0) finishTimer();
+    }, 250);
+    renderTimer();
+});
+
+$("#timerReset").addEventListener("click", () => { stopTimer(); remaining = MODES[mode]; renderTimer(); });
+
+$("#modes").addEventListener("click", e => {
+    const b = e.target.closest("[data-mode]");
+    if (!b) return;
+    stopTimer();
+    mode = b.dataset.mode;
+    remaining = MODES[mode];
+    $$("#modes .chip").forEach(c => c.classList.toggle("active", c === b));
+    renderTimer();
+});
+
+/* ============ Settings: backup / restore ============ */
+$("#exportBtn").addEventListener("click", () => {
+    const data = {
+        app: "nexora", version: 1, exported: new Date().toISOString(),
+        profile: getProfile(), tasks, notes, sessions: getSessions(),
+        theme: store.get("nexoraTheme", "dark")
     };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    const a = h("a", { href: url, download: "nexora-backup-" + todayStr() + ".json" });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("Backup downloaded");
+});
 
-    if (!profile.name || !profile.email) {
-        alert("Please enter your name and email first.");
-        return;
-    }
+$("#importBtn").addEventListener("click", () => $("#importFile").click());
 
-    localStorage.setItem("nexoraProfile", JSON.stringify(profile));
-    alert("Your profile has been saved!");
+$("#importFile").addEventListener("change", e => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const d = JSON.parse(reader.result);
+            if (!d || d.app !== "nexora") throw new Error("not a Nexora backup");
+            if (!confirm("Restoring will replace your current Nexora data. Continue?")) return;
+            const prof = d.profile && typeof d.profile === "object" && !Array.isArray(d.profile) ? d.profile : {};
+            const cleanProfile = {};
+            FIELDS.forEach(f => { cleanProfile[f.id] = String(prof[f.id] || "").slice(0, 150); });
+            tasks = (Array.isArray(d.tasks) ? d.tasks : []).filter(t => t && typeof t.text === "string").map(t => ({
+                id: String(t.id || uid()), text: t.text.slice(0, 200), done: !!t.done,
+                priority: RANK[t.priority] !== undefined ? t.priority : "medium",
+                due: /^\d{4}-\d{2}-\d{2}$/.test(t.due || "") ? t.due : ""
+            }));
+            notes = (Array.isArray(d.notes) ? d.notes : []).filter(n => n && typeof n === "object").map(n => ({
+                id: String(n.id || uid()), title: String(n.title || "").slice(0, 80),
+                body: String(n.body || "").slice(0, 4000), date: Number(n.date) || Date.now()
+            }));
+            store.set("nexoraProfile", cleanProfile);
+            store.set("nexoraTasks", tasks);
+            store.set("nexoraNotes", notes);
+            store.set("nexoraSessions", d.sessions && typeof d.sessions === "object" && !Array.isArray(d.sessions) ? d.sessions : {});
+            applyTheme(d.theme === "light" ? "light" : "dark");
+            refreshAll();
+            toast("Backup restored ✔");
+        } catch {
+            toast("That file is not a valid Nexora backup");
+        }
+    };
+    reader.readAsText(file);
+});
+
+$("#resetBtn").addEventListener("click", () => {
+    if (!confirm("Delete ALL your Nexora data from this browser? This cannot be undone.")) return;
+    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions"].forEach(k => localStorage.removeItem(k));
+    tasks = []; notes = [];
+    refreshAll();
+    toast("All data deleted");
+});
+
+/* ============ Init ============ */
+function refreshAll() {
+    buildProfileForm();
+    buildDemo();
+    renderProfileMeter();
+    renderTasks();
+    renderNotes();
+    renderSessions();
+    renderDashboard();
+    generateMessage();
 }
 
-function loadProfile() {
-    const saved = localStorage.getItem("nexoraProfile");
+$("#dateChip").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
-    if (!saved) {
-        alert("No saved profile found.");
-        return;
-    }
-
-    const profile = JSON.parse(saved);
-
-    document.getElementById("fullName").value = profile.name || "";
-    document.getElementById("email").value = profile.email || "";
-    document.getElementById("phone").value = profile.phone || "";
-
-    alert("Your saved profile has been loaded!");
-}
-
-function autofillDemo() {
-    const saved = localStorage.getItem("nexoraProfile");
-
-    if (!saved) {
-        alert("Please save your profile first.");
-        return;
-    }
-
-    const profile = JSON.parse(saved);
-
-    document.getElementById("autoName").value = profile.name || "";
-    document.getElementById("autoEmail").value = profile.email || "";
-    document.getElementById("autoPhone").value = profile.phone || "";
-
-    alert("Autofill completed!");
-}
+buildProfileForm();
+buildDemo();
+buildWriter();
+renderTasks();
+renderNotes();
+renderTimer();
+renderSessions();
+go(location.hash.slice(1) || "dashboard");
 </script>
 </body>
 </html>
