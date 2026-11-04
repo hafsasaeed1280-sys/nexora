@@ -6,7 +6,12 @@
 <meta name="theme-color" content="#0b0b12">
 <meta name="description" content="Nexora - your smart digital workspace for profiles, tasks, notes, messages and focus.">
 <title>Nexora | Smart Digital Workspace</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nexora">
 
 <style>
 :root {
@@ -710,6 +715,13 @@ textarea { resize: vertical; min-height: 100px; }
 
         <!-- Settings -->
         <section class="view" id="view-settings">
+            <div class="card" id="installCard">
+                <h2>Install Nexora</h2>
+                <p id="installText">Install Nexora as an app on this device. It opens in its own window and works offline.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="installBtn" type="button" hidden>Install app</button>
+                </div>
+            </div>
             <div class="card">
                 <h2>Appearance</h2>
                 <p>Choose how Nexora looks.</p>
@@ -1458,6 +1470,53 @@ renderNotes();
 renderTimer();
 renderSessions();
 go(location.hash.slice(1) || "dashboard");
+
+/* ============ Install as app (PWA) ============ */
+let installEvent = null;
+const isStandalone = () =>
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+function updateInstallCard() {
+    const btn = $("#installBtn"), txt = $("#installText");
+    if (isStandalone()) {
+        txt.textContent = "Nexora is installed and running as an app. ✔";
+        btn.hidden = true;
+    } else if (installEvent) {
+        btn.hidden = false;
+    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        txt.textContent = "On iPhone or iPad: tap the Share button in Safari, then choose \"Add to Home Screen\".";
+    } else {
+        txt.textContent = "To install: open the browser menu (⋮) and choose \"Install app\" or \"Add to Home screen\". If you do not see it yet, reload the page once.";
+    }
+}
+
+window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    installEvent = e;
+    updateInstallCard();
+});
+
+window.addEventListener("appinstalled", () => {
+    installEvent = null;
+    toast("Nexora installed 🎉");
+    updateInstallCard();
+});
+
+$("#installBtn").addEventListener("click", async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    try { await installEvent.userChoice; } catch { /* ignore */ }
+    installEvent = null;
+    $("#installBtn").hidden = true;
+});
+
+updateInstallCard();
+
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => { /* offline support is optional */ });
+    });
+}
 </script>
 </body>
 </html>
