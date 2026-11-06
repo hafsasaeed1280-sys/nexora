@@ -446,6 +446,44 @@ textarea { resize: vertical; min-height: 100px; }
 .modes { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .timer-wrap .row { justify-content: center; }
 
+/* ---------- CV Builder ---------- */
+.cv-section-title { display: flex; justify-content: space-between; align-items: center; margin: 22px 0 10px; }
+.cv-section-title h3 { margin: 0; }
+.cv-entry { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.cv-entry input, .cv-entry textarea { margin-bottom: 8px; }
+.cv-entry textarea { min-height: 64px; margin-bottom: 0; }
+.cv-entry-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.cv-scroll { overflow-x: auto; }
+
+.paper {
+    --cv: #7c3aed;
+    background: #fff;
+    color: #1c1a2e;
+    padding: 32px;
+    border-radius: 10px;
+    font-size: .88rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.paper .cv-head { text-align: center; margin-bottom: 16px; }
+.paper .cv-name { font-size: 1.7rem; font-weight: 800; letter-spacing: .3px; line-height: 1.2; }
+.paper .cv-title { font-size: 1rem; color: var(--cv); font-weight: 600; margin-top: 2px; }
+.paper .cv-contact { font-size: .82rem; color: #555; margin-top: 6px; }
+.paper .cv-sec { margin-top: 16px; }
+.paper .cv-sec h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: 1.4px; color: var(--cv); border-bottom: 2px solid var(--cv); padding-bottom: 3px; margin: 0 0 8px; }
+.paper .cv-item { margin-bottom: 10px; break-inside: avoid; }
+.paper .cv-row { display: flex; justify-content: space-between; gap: 10px; }
+.paper .cv-period { color: #666; font-size: .82rem; white-space: nowrap; }
+.paper .cv-sub { color: #444; font-style: italic; }
+.paper .cv-desc { white-space: pre-wrap; color: #333; margin-top: 2px; }
+.paper .cv-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.paper .cv-skill { border: 1px solid var(--cv); color: var(--cv); border-radius: 999px; padding: 1px 10px; font-size: .8rem; }
+.paper--modern .cv-head { text-align: left; background: var(--cv); margin: -32px -32px 18px; padding: 28px 32px; }
+.paper--modern .cv-name, .paper--modern .cv-title, .paper--modern .cv-contact { color: #fff; }
+.paper--modern .cv-title, .paper--modern .cv-contact { opacity: .92; }
+
 /* ---------- Toast ---------- */
 #toast {
     position: fixed;
@@ -507,6 +545,23 @@ textarea { resize: vertical; min-height: 100px; }
     .hero h1 { font-size: 1.4rem; }
     .date-chip { display: none; }
 }
+
+/* ---------- Print (CV) ---------- */
+@page { margin: 12mm; }
+@media print {
+    body { background: #fff; }
+    .app { display: block; }
+    .sidebar, .topbar, #toast, .no-print { display: none !important; }
+    .content { padding: 0; max-width: none; }
+    .view { display: none !important; }
+    #view-cv { display: block !important; animation: none; }
+    #view-cv .grid2 { display: block; }
+    #view-cv .cv-form-card { display: none !important; }
+    #view-cv .cv-preview-card { border: none; box-shadow: none; padding: 0; background: #fff; margin: 0; }
+    .cv-scroll { overflow: visible; }
+    .paper { padding: 0; border-radius: 0; }
+    .paper--modern .cv-head { margin: 0 0 14px; padding: 22px 24px; }
+}
 </style>
 </head>
 
@@ -519,6 +574,7 @@ textarea { resize: vertical; min-height: 100px; }
         <button class="nav-btn" data-view="profile"><span class="ic">👤</span>Smart Profile</button>
         <button class="nav-btn" data-view="tasks"><span class="ic">✅</span>Tasks</button>
         <button class="nav-btn" data-view="notes"><span class="ic">📝</span>Notes</button>
+        <button class="nav-btn" data-view="cv"><span class="ic">📄</span>CV Builder</button>
         <button class="nav-btn" data-view="writer"><span class="ic">✉️</span>Writer</button>
         <button class="nav-btn" data-view="focus"><span class="ic">⏱️</span>Focus</button>
         <button class="nav-btn" data-view="settings"><span class="ic">⚙️</span>Settings</button>
@@ -558,6 +614,7 @@ textarea { resize: vertical; min-height: 100px; }
                         <button class="tool" data-go="notes"><span>📝</span>Quick Notes</button>
                         <button class="tool" data-go="writer"><span>✉️</span>Message Writer</button>
                         <button class="tool" data-go="focus"><span>⏱️</span>Focus Timer</button>
+                        <button class="tool" data-go="cv" style="grid-column:1/-1"><span>📄</span>CV Builder</button>
                     </div>
                     <p id="profileTip" style="margin:14px 0 0"></p>
                 </div>
@@ -656,6 +713,66 @@ textarea { resize: vertical; min-height: 100px; }
             <div class="notes" id="notesGrid"></div>
         </section>
 
+        <!-- CV Builder -->
+        <section class="view" id="view-cv">
+            <div class="grid2">
+                <div class="card cv-form-card">
+                    <h2>Build your CV</h2>
+                    <p>Your name and contact details come from your Smart Profile. Fill in the rest and your CV updates live.</p>
+                    <button class="btn small" type="button" data-go="profile">Edit profile details</button>
+
+                    <label for="cvTitle">Job title / headline</label>
+                    <input id="cvTitle" maxlength="100" placeholder="e.g. Junior Web Developer">
+
+                    <label for="cvSummary">Short summary</label>
+                    <textarea id="cvSummary" maxlength="600" placeholder="Two or three lines about you and what you are looking for"></textarea>
+
+                    <label for="cvSkills">Skills (separate with commas)</label>
+                    <input id="cvSkills" maxlength="400" placeholder="HTML, CSS, JavaScript, Communication">
+
+                    <div class="cv-section-title"><h3>Experience</h3><button class="btn small" type="button" data-cvadd="exp">+ Add</button></div>
+                    <div id="cvList-exp"></div>
+
+                    <div class="cv-section-title"><h3>Education</h3><button class="btn small" type="button" data-cvadd="edu">+ Add</button></div>
+                    <div id="cvList-edu"></div>
+
+                    <div class="cv-section-title"><h3>Projects</h3><button class="btn small" type="button" data-cvadd="proj">+ Add</button></div>
+                    <div id="cvList-proj"></div>
+
+                    <div class="cv-section-title"><h3>Look</h3></div>
+                    <div class="grid2" style="gap:12px">
+                        <div>
+                            <label for="cvTemplate" style="margin-top:0">Template</label>
+                            <select id="cvTemplate">
+                                <option value="classic">Classic</option>
+                                <option value="modern">Modern</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cvAccent" style="margin-top:0">Colour</label>
+                            <select id="cvAccent">
+                                <option value="#7c3aed">Purple</option>
+                                <option value="#2563eb">Blue</option>
+                                <option value="#059669">Green</option>
+                                <option value="#dc2626">Red</option>
+                                <option value="#111827">Black</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card cv-preview-card">
+                    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+                        <h3 style="margin:0">Live preview</h3>
+                        <button class="btn primary" id="cvPrint" type="button">Print / Save as PDF</button>
+                    </div>
+                    <p class="no-print" id="cvHint"></p>
+                    <p class="no-print"><small>In the print window, choose "Save as PDF" as the destination.</small></p>
+                    <div class="cv-scroll"><div id="cvPaper"></div></div>
+                </div>
+            </div>
+        </section>
+
         <!-- Message Writer -->
         <section class="view" id="view-writer">
             <div class="grid2">
@@ -742,7 +859,7 @@ textarea { resize: vertical; min-height: 100px; }
             </div>
             <div class="card">
                 <h2>About Nexora</h2>
-                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, a message writer and a focus timer, all in one place.</p>
+                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, a CV builder, a message writer and a focus timer, all in one place.</p>
             </div>
         </section>
     </main>
@@ -860,7 +977,7 @@ let notes = getNotes();
 /* ============ Navigation ============ */
 const TITLES = {
     dashboard: "Dashboard", profile: "Smart Profile", tasks: "Tasks",
-    notes: "Notes", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
+    notes: "Notes", cv: "CV Builder", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
 };
 
 function go(view) {
@@ -873,6 +990,7 @@ function go(view) {
     if (view === "dashboard") renderDashboard();
     if (view === "profile") renderProfileMeter();
     if (view === "writer") generateMessage();
+    if (view === "cv") renderCV();
     if (view === "focus") renderSessions();
 }
 
@@ -1390,7 +1508,7 @@ $("#modes").addEventListener("click", e => {
 $("#exportBtn").addEventListener("click", () => {
     const data = {
         app: "nexora", version: 1, exported: new Date().toISOString(),
-        profile: getProfile(), tasks, notes, sessions: getSessions(),
+        profile: getProfile(), tasks, notes, cv, sessions: getSessions(),
         theme: store.get("nexoraTheme", "dark")
     };
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
@@ -1426,6 +1544,8 @@ $("#importFile").addEventListener("change", e => {
                 id: String(n.id || uid()), title: String(n.title || "").slice(0, 80),
                 body: String(n.body || "").slice(0, 4000), date: Number(n.date) || Date.now()
             }));
+            cv = cleanCV(d.cv);
+            store.set("nexoraCV", cv);
             store.set("nexoraProfile", cleanProfile);
             store.set("nexoraTasks", tasks);
             store.set("nexoraNotes", notes);
@@ -1442,15 +1562,139 @@ $("#importFile").addEventListener("change", e => {
 
 $("#resetBtn").addEventListener("click", () => {
     if (!confirm("Delete ALL your Nexora data from this browser? This cannot be undone.")) return;
-    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions"].forEach(k => localStorage.removeItem(k));
-    tasks = []; notes = [];
+    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV"].forEach(k => localStorage.removeItem(k));
+    tasks = []; notes = []; cv = cleanCV({});
     refreshAll();
     toast("All data deleted");
+});
+
+/* ============ CV Builder ============ */
+const CV_COLORS = ["#7c3aed", "#2563eb", "#059669", "#dc2626", "#111827"];
+
+const CV_LISTS = {
+    exp: { label: "Experience", f: ["Role / title", "Company", "Period (e.g. 2023 - 2024)", "What you did"] },
+    edu: { label: "Education", f: ["Degree / program", "Institute", "Period (e.g. 2021 - 2025)", "Details (optional)"] },
+    proj: { label: "Project", f: ["Project name", "Technologies / link", "Period (optional)", "What it does"] }
+};
+
+function cleanCV(c) {
+    c = c && typeof c === "object" && !Array.isArray(c) ? c : {};
+    const list = k => (Array.isArray(c[k]) ? c[k] : []).slice(0, 12)
+        .filter(e => e && typeof e === "object")
+        .map(e => ({
+            a: String(e.a || "").slice(0, 120), b: String(e.b || "").slice(0, 120),
+            c: String(e.c || "").slice(0, 60), d: String(e.d || "").slice(0, 800)
+        }));
+    return {
+        title: String(c.title || "").slice(0, 100),
+        summary: String(c.summary || "").slice(0, 600),
+        skills: String(c.skills || "").slice(0, 400),
+        exp: list("exp"), edu: list("edu"), proj: list("proj"),
+        template: c.template === "modern" ? "modern" : "classic",
+        accent: CV_COLORS.includes(c.accent) ? c.accent : CV_COLORS[0]
+    };
+}
+
+let cv = cleanCV(store.get("nexoraCV", {}));
+function saveCV() { store.set("nexoraCV", cv); }
+
+function buildCVForm() {
+    $("#cvTitle").value = cv.title;
+    $("#cvSummary").value = cv.summary;
+    $("#cvSkills").value = cv.skills;
+    $("#cvTemplate").value = cv.template;
+    $("#cvAccent").value = cv.accent;
+    Object.keys(CV_LISTS).forEach(buildCVList);
+    renderCV();
+}
+
+function buildCVList(key) {
+    const spec = CV_LISTS[key];
+    const box = $("#cvList-" + key);
+    const nodes = cv[key].map((entry, i) => {
+        const field = (name, ph, tag) => h(tag || "input", {
+            placeholder: ph, "aria-label": ph, maxlength: tag ? "800" : "120", value: entry[name],
+            oninput: ev => { entry[name] = ev.target.value; saveCV(); renderCV(); }
+        });
+        return h("div", { class: "cv-entry" },
+            h("div", { class: "cv-entry-head" },
+                h("small", { text: spec.label + " " + (i + 1) }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Remove",
+                    onclick: () => { cv[key].splice(i, 1); saveCV(); buildCVList(key); renderCV(); }
+                })),
+            field("a", spec.f[0]), field("b", spec.f[1]), field("c", spec.f[2]), field("d", spec.f[3], "textarea"));
+    });
+    box.replaceChildren(...(nodes.length ? nodes : [h("p", { text: "Nothing added yet." })]));
+}
+
+function cvEntries(list) {
+    return list.filter(e => e.a || e.b || e.c || e.d).map(e =>
+        h("div", { class: "cv-item" },
+            h("div", { class: "cv-row" },
+                h("strong", { text: e.a }),
+                e.c ? h("span", { class: "cv-period", text: e.c }) : null),
+            e.b ? h("div", { class: "cv-sub", text: e.b }) : null,
+            e.d ? h("div", { class: "cv-desc", text: e.d }) : null));
+}
+
+function cvSection(title, nodes) {
+    return nodes.length ? h("div", { class: "cv-sec" }, h("h2", { text: title }), ...nodes) : null;
+}
+
+function renderCV() {
+    const p = getProfile();
+    const contact = [p.email, p.phone, [p.address, p.city].filter(Boolean).join(", "), p.linkedin].filter(Boolean);
+    const skills = cv.skills.split(",").map(x => x.trim()).filter(Boolean).slice(0, 30);
+    let edu = cvEntries(cv.edu);
+    if (!edu.length && p.education) edu = [h("div", { class: "cv-item" }, h("strong", { text: p.education }))];
+
+    const paper = h("div", { class: "paper paper--" + cv.template, style: "--cv:" + cv.accent },
+        h("div", { class: "cv-head" },
+            h("div", { class: "cv-name", text: p.name || "Your Name" }),
+            cv.title ? h("div", { class: "cv-title", text: cv.title }) : null,
+            contact.length ? h("div", { class: "cv-contact", text: contact.join("  •  ") }) : null),
+        cvSection("Summary", cv.summary ? [h("div", { class: "cv-desc", text: cv.summary })] : []),
+        cvSection("Skills", skills.length ? [h("div", { class: "cv-skills" }, ...skills.map(x => h("span", { class: "cv-skill", text: x })))] : []),
+        cvSection("Experience", cvEntries(cv.exp)),
+        cvSection("Education", edu),
+        cvSection("Projects", cvEntries(cv.proj)));
+
+    $("#cvPaper").replaceChildren(paper);
+    $("#cvHint").textContent = p.name ? "" : "Tip: save your Smart Profile first, so your name and contact details appear here.";
+}
+
+[["#cvTitle", "title"], ["#cvSummary", "summary"], ["#cvSkills", "skills"]].forEach(([sel, key]) =>
+    $(sel).addEventListener("input", e => { cv[key] = e.target.value; saveCV(); renderCV(); }));
+
+$("#cvTemplate").addEventListener("change", e => {
+    cv.template = e.target.value === "modern" ? "modern" : "classic";
+    saveCV(); renderCV();
+});
+
+$("#cvAccent").addEventListener("change", e => {
+    cv.accent = CV_COLORS.includes(e.target.value) ? e.target.value : CV_COLORS[0];
+    saveCV(); renderCV();
+});
+
+$$("[data-cvadd]").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.cvadd;
+    if (cv[k].length >= 12) { toast("You can add up to 12 entries"); return; }
+    cv[k].push({ a: "", b: "", c: "", d: "" });
+    saveCV(); buildCVList(k); renderCV();
+}));
+
+$("#cvPrint").addEventListener("click", () => {
+    const old = document.title;
+    document.title = (getProfile().name || "Nexora") + " - CV";
+    window.print();
+    document.title = old;
 });
 
 /* ============ Init ============ */
 function refreshAll() {
     buildProfileForm();
+    buildCVForm();
     buildDemo();
     renderProfileMeter();
     renderTasks();
@@ -1465,6 +1709,7 @@ $("#dateChip").textContent = new Date().toLocaleDateString("en-GB", { weekday: "
 buildProfileForm();
 buildDemo();
 buildWriter();
+buildCVForm();
 renderTasks();
 renderNotes();
 renderTimer();
@@ -1482,6 +1727,7 @@ function updateInstallCard() {
         txt.textContent = "Nexora is installed and running as an app. ✔";
         btn.hidden = true;
     } else if (installEvent) {
+        txt.textContent = "Install Nexora as an app on this device. It opens in its own window and works offline.";
         btn.hidden = false;
     } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
         txt.textContent = "On iPhone or iPad: tap the Share button in Safari, then choose \"Add to Home Screen\".";
