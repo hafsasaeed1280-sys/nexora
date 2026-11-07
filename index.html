@@ -546,6 +546,23 @@ textarea { resize: vertical; min-height: 100px; }
     .date-chip { display: none; }
 }
 
+/* ---------- Expense Tracker ---------- */
+.exp-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: end; }
+.exp-form label { margin-top: 0; }
+.exp-form .wide3 { grid-column: span 3; }
+.bar-row { margin-top: 14px; }
+.bar-top { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; }
+.bar-top span:last-child { color: var(--muted); white-space: nowrap; }
+.check { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-weight: 500; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--accent); }
+.paper--minimal .cv-head { text-align: left; border-bottom: 3px solid var(--cv); padding-bottom: 10px; }
+.paper--minimal .cv-name { color: var(--cv); }
+.paper--minimal .cv-sec h2 { color: #1c1a2e; border-bottom: 1px solid #ddd; }
+@media (max-width: 860px) {
+    .exp-form { grid-template-columns: 1fr 1fr; }
+    .exp-form .wide3 { grid-column: 1 / -1; }
+}
+
 /* ---------- Print (CV) ---------- */
 @page { margin: 12mm; }
 @media print {
@@ -573,6 +590,7 @@ textarea { resize: vertical; min-height: 100px; }
         <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span>Dashboard</button>
         <button class="nav-btn" data-view="profile"><span class="ic">👤</span>Smart Profile</button>
         <button class="nav-btn" data-view="tasks"><span class="ic">✅</span>Tasks</button>
+        <button class="nav-btn" data-view="expenses"><span class="ic">💰</span>Expenses</button>
         <button class="nav-btn" data-view="notes"><span class="ic">📝</span>Notes</button>
         <button class="nav-btn" data-view="cv"><span class="ic">📄</span>CV Builder</button>
         <button class="nav-btn" data-view="writer"><span class="ic">✉️</span>Writer</button>
@@ -614,7 +632,8 @@ textarea { resize: vertical; min-height: 100px; }
                         <button class="tool" data-go="notes"><span>📝</span>Quick Notes</button>
                         <button class="tool" data-go="writer"><span>✉️</span>Message Writer</button>
                         <button class="tool" data-go="focus"><span>⏱️</span>Focus Timer</button>
-                        <button class="tool" data-go="cv" style="grid-column:1/-1"><span>📄</span>CV Builder</button>
+                        <button class="tool" data-go="cv"><span>📄</span>CV Builder</button>
+                        <button class="tool" data-go="expenses"><span>💰</span>Expense Tracker</button>
                     </div>
                     <p id="profileTip" style="margin:14px 0 0"></p>
                 </div>
@@ -695,6 +714,59 @@ textarea { resize: vertical; min-height: 100px; }
             </div>
         </section>
 
+        <!-- Expense Tracker -->
+        <section class="view" id="view-expenses">
+            <div class="card">
+                <form id="expForm" class="exp-form">
+                    <div>
+                        <label for="expType">Type</label>
+                        <select id="expType">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="expAmount">Amount (Rs)</label>
+                        <input id="expAmount" type="number" min="0.01" max="999999999" step="0.01" required placeholder="0" inputmode="decimal">
+                    </div>
+                    <div>
+                        <label for="expCat">Category</label>
+                        <select id="expCat"></select>
+                    </div>
+                    <div>
+                        <label for="expDate">Date</label>
+                        <input id="expDate" type="date" required>
+                    </div>
+                    <div class="wide3">
+                        <label for="expNote">Note (optional)</label>
+                        <input id="expNote" maxlength="80" placeholder="e.g. Lunch with friends">
+                    </div>
+                    <button class="btn primary" type="submit">Add</button>
+                </form>
+            </div>
+
+            <div class="toolbar" style="margin-top:0">
+                <div class="inline">
+                    <label for="expMonth" style="margin:0">Month</label>
+                    <input id="expMonth" type="month" style="width:auto">
+                </div>
+                <button class="btn" id="expCsv" type="button">Download CSV</button>
+            </div>
+
+            <div class="stats" id="expStats"></div>
+
+            <div class="grid2">
+                <div class="card">
+                    <h3>Where your money went</h3>
+                    <div id="expBars"></div>
+                </div>
+                <div class="card">
+                    <h3>Transactions</h3>
+                    <ul class="list" id="expList"></ul>
+                </div>
+            </div>
+        </section>
+
         <!-- Notes -->
         <section class="view" id="view-notes">
             <div class="card">
@@ -730,6 +802,9 @@ textarea { resize: vertical; min-height: 100px; }
                     <label for="cvSkills">Skills (separate with commas)</label>
                     <input id="cvSkills" maxlength="400" placeholder="HTML, CSS, JavaScript, Communication">
 
+                    <label for="cvLanguages">Languages (separate with commas)</label>
+                    <input id="cvLanguages" maxlength="200" placeholder="Urdu, English">
+
                     <div class="cv-section-title"><h3>Experience</h3><button class="btn small" type="button" data-cvadd="exp">+ Add</button></div>
                     <div id="cvList-exp"></div>
 
@@ -739,6 +814,17 @@ textarea { resize: vertical; min-height: 100px; }
                     <div class="cv-section-title"><h3>Projects</h3><button class="btn small" type="button" data-cvadd="proj">+ Add</button></div>
                     <div id="cvList-proj"></div>
 
+                    <div class="cv-section-title"><h3>Certificates</h3><button class="btn small" type="button" data-cvadd="cert">+ Add</button></div>
+                    <div id="cvList-cert"></div>
+
+                    <div class="cv-section-title"><h3>Show on CV</h3></div>
+                    <p>Choose which contact details appear. Your home address is hidden by default, for your safety.</p>
+                    <label class="check"><input type="checkbox" data-cvshow="email"> Email</label>
+                    <label class="check"><input type="checkbox" data-cvshow="phone"> Phone</label>
+                    <label class="check"><input type="checkbox" data-cvshow="city"> City</label>
+                    <label class="check"><input type="checkbox" data-cvshow="address"> Full address</label>
+                    <label class="check"><input type="checkbox" data-cvshow="linkedin"> LinkedIn / website</label>
+
                     <div class="cv-section-title"><h3>Look</h3></div>
                     <div class="grid2" style="gap:12px">
                         <div>
@@ -746,6 +832,7 @@ textarea { resize: vertical; min-height: 100px; }
                             <select id="cvTemplate">
                                 <option value="classic">Classic</option>
                                 <option value="modern">Modern</option>
+                                <option value="minimal">Minimal</option>
                             </select>
                         </div>
                         <div>
@@ -859,7 +946,7 @@ textarea { resize: vertical; min-height: 100px; }
             </div>
             <div class="card">
                 <h2>About Nexora</h2>
-                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, a CV builder, a message writer and a focus timer, all in one place.</p>
+                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, an expense tracker, a CV builder, a message writer and a focus timer, all in one place.</p>
             </div>
         </section>
     </main>
@@ -977,7 +1064,7 @@ let notes = getNotes();
 /* ============ Navigation ============ */
 const TITLES = {
     dashboard: "Dashboard", profile: "Smart Profile", tasks: "Tasks",
-    notes: "Notes", cv: "CV Builder", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
+    notes: "Notes", expenses: "Expense Tracker", cv: "CV Builder", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
 };
 
 function go(view) {
@@ -991,6 +1078,7 @@ function go(view) {
     if (view === "profile") renderProfileMeter();
     if (view === "writer") generateMessage();
     if (view === "cv") renderCV();
+    if (view === "expenses") renderExpenses();
     if (view === "focus") renderSessions();
 }
 
@@ -1031,6 +1119,7 @@ function renderDashboard() {
         ["📌", pending, "Pending tasks"],
         ["✅", done, "Completed"],
         ["📝", notes.length, "Notes saved"],
+        ["💸", money(monthSpent()), "Spent this month"],
         ["🔥", sess, "Focus sessions today"]
     ];
     const box = $("#stats");
@@ -1508,7 +1597,7 @@ $("#modes").addEventListener("click", e => {
 $("#exportBtn").addEventListener("click", () => {
     const data = {
         app: "nexora", version: 1, exported: new Date().toISOString(),
-        profile: getProfile(), tasks, notes, cv, sessions: getSessions(),
+        profile: getProfile(), tasks, notes, cv, expenses, sessions: getSessions(),
         theme: store.get("nexoraTheme", "dark")
     };
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
@@ -1546,6 +1635,8 @@ $("#importFile").addEventListener("change", e => {
             }));
             cv = cleanCV(d.cv);
             store.set("nexoraCV", cv);
+            expenses = cleanExpenses(d.expenses);
+            store.set("nexoraExpenses", expenses);
             store.set("nexoraProfile", cleanProfile);
             store.set("nexoraTasks", tasks);
             store.set("nexoraNotes", notes);
@@ -1562,19 +1653,21 @@ $("#importFile").addEventListener("change", e => {
 
 $("#resetBtn").addEventListener("click", () => {
     if (!confirm("Delete ALL your Nexora data from this browser? This cannot be undone.")) return;
-    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV"].forEach(k => localStorage.removeItem(k));
-    tasks = []; notes = []; cv = cleanCV({});
+    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses"].forEach(k => localStorage.removeItem(k));
+    tasks = []; notes = []; cv = cleanCV({}); expenses = [];
     refreshAll();
     toast("All data deleted");
 });
 
 /* ============ CV Builder ============ */
 const CV_COLORS = ["#7c3aed", "#2563eb", "#059669", "#dc2626", "#111827"];
+const CV_TEMPLATES = ["classic", "modern", "minimal"];
 
 const CV_LISTS = {
     exp: { label: "Experience", f: ["Role / title", "Company", "Period (e.g. 2023 - 2024)", "What you did"] },
     edu: { label: "Education", f: ["Degree / program", "Institute", "Period (e.g. 2021 - 2025)", "Details (optional)"] },
-    proj: { label: "Project", f: ["Project name", "Technologies / link", "Period (optional)", "What it does"] }
+    proj: { label: "Project", f: ["Project name", "Technologies / link", "Period (optional)", "What it does"] },
+    cert: { label: "Certificate", f: ["Certificate / course name", "Issued by", "Year", "Details (optional)"] }
 };
 
 function cleanCV(c) {
@@ -1585,13 +1678,19 @@ function cleanCV(c) {
             a: String(e.a || "").slice(0, 120), b: String(e.b || "").slice(0, 120),
             c: String(e.c || "").slice(0, 60), d: String(e.d || "").slice(0, 800)
         }));
+    const sh = c.show && typeof c.show === "object" && !Array.isArray(c.show) ? c.show : {};
     return {
         title: String(c.title || "").slice(0, 100),
         summary: String(c.summary || "").slice(0, 600),
         skills: String(c.skills || "").slice(0, 400),
-        exp: list("exp"), edu: list("edu"), proj: list("proj"),
-        template: c.template === "modern" ? "modern" : "classic",
-        accent: CV_COLORS.includes(c.accent) ? c.accent : CV_COLORS[0]
+        languages: String(c.languages || "").slice(0, 200),
+        exp: list("exp"), edu: list("edu"), proj: list("proj"), cert: list("cert"),
+        template: CV_TEMPLATES.includes(c.template) ? c.template : "classic",
+        accent: CV_COLORS.includes(c.accent) ? c.accent : CV_COLORS[0],
+        show: {
+            email: sh.email !== false, phone: sh.phone !== false, city: sh.city !== false,
+            address: sh.address === true, linkedin: sh.linkedin !== false
+        }
     };
 }
 
@@ -1602,8 +1701,10 @@ function buildCVForm() {
     $("#cvTitle").value = cv.title;
     $("#cvSummary").value = cv.summary;
     $("#cvSkills").value = cv.skills;
+    $("#cvLanguages").value = cv.languages;
     $("#cvTemplate").value = cv.template;
     $("#cvAccent").value = cv.accent;
+    $$("[data-cvshow]").forEach(c => { c.checked = !!cv.show[c.dataset.cvshow]; });
     Object.keys(CV_LISTS).forEach(buildCVList);
     renderCV();
 }
@@ -1644,8 +1745,11 @@ function cvSection(title, nodes) {
 
 function renderCV() {
     const p = getProfile();
-    const contact = [p.email, p.phone, [p.address, p.city].filter(Boolean).join(", "), p.linkedin].filter(Boolean);
+    const sh = cv.show;
+    const place = [sh.address ? p.address : "", sh.city ? p.city : ""].filter(Boolean).join(", ");
+    const contact = [sh.email ? p.email : "", sh.phone ? p.phone : "", place, sh.linkedin ? p.linkedin : ""].filter(Boolean);
     const skills = cv.skills.split(",").map(x => x.trim()).filter(Boolean).slice(0, 30);
+    const langs = cv.languages.split(",").map(x => x.trim()).filter(Boolean).slice(0, 10);
     let edu = cvEntries(cv.edu);
     if (!edu.length && p.education) edu = [h("div", { class: "cv-item" }, h("strong", { text: p.education }))];
 
@@ -1656,19 +1760,21 @@ function renderCV() {
             contact.length ? h("div", { class: "cv-contact", text: contact.join("  •  ") }) : null),
         cvSection("Summary", cv.summary ? [h("div", { class: "cv-desc", text: cv.summary })] : []),
         cvSection("Skills", skills.length ? [h("div", { class: "cv-skills" }, ...skills.map(x => h("span", { class: "cv-skill", text: x })))] : []),
+        cvSection("Languages", langs.length ? [h("div", { class: "cv-desc", text: langs.join("  •  ") })] : []),
         cvSection("Experience", cvEntries(cv.exp)),
         cvSection("Education", edu),
-        cvSection("Projects", cvEntries(cv.proj)));
+        cvSection("Projects", cvEntries(cv.proj)),
+        cvSection("Certificates", cvEntries(cv.cert)));
 
     $("#cvPaper").replaceChildren(paper);
     $("#cvHint").textContent = p.name ? "" : "Tip: save your Smart Profile first, so your name and contact details appear here.";
 }
 
-[["#cvTitle", "title"], ["#cvSummary", "summary"], ["#cvSkills", "skills"]].forEach(([sel, key]) =>
+[["#cvTitle", "title"], ["#cvSummary", "summary"], ["#cvSkills", "skills"], ["#cvLanguages", "languages"]].forEach(([sel, key]) =>
     $(sel).addEventListener("input", e => { cv[key] = e.target.value; saveCV(); renderCV(); }));
 
 $("#cvTemplate").addEventListener("change", e => {
-    cv.template = e.target.value === "modern" ? "modern" : "classic";
+    cv.template = CV_TEMPLATES.includes(e.target.value) ? e.target.value : "classic";
     saveCV(); renderCV();
 });
 
@@ -1676,6 +1782,11 @@ $("#cvAccent").addEventListener("change", e => {
     cv.accent = CV_COLORS.includes(e.target.value) ? e.target.value : CV_COLORS[0];
     saveCV(); renderCV();
 });
+
+$$("[data-cvshow]").forEach(c => c.addEventListener("change", () => {
+    cv.show[c.dataset.cvshow] = c.checked;
+    saveCV(); renderCV();
+}));
 
 $$("[data-cvadd]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.cvadd;
@@ -1691,10 +1802,147 @@ $("#cvPrint").addEventListener("click", () => {
     document.title = old;
 });
 
+/* ============ Expense Tracker ============ */
+const EXP_CATS = {
+    expense: ["Food", "Transport", "Bills", "Shopping", "Education", "Health", "Fun", "Other"],
+    income: ["Pocket money", "Salary", "Gift", "Other"]
+};
+const EXP_ICONS = {
+    Food: "🍔", Transport: "🚌", Bills: "💡", Shopping: "🛍️", Education: "📚", Health: "💊",
+    Fun: "🎬", Other: "📦", "Pocket money": "👛", Salary: "💼", Gift: "🎁"
+};
+
+function cleanExpenses(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 5000).filter(e =>
+        e && typeof e === "object" &&
+        (e.type === "expense" || e.type === "income") &&
+        Number.isFinite(Number(e.amount)) && Number(e.amount) > 0 && Number(e.amount) < 1e10 &&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(e.date || ""))
+    ).map(e => ({
+        id: String(e.id || uid()), type: e.type, amount: Math.round(Number(e.amount) * 100) / 100,
+        cat: EXP_CATS[e.type].includes(e.cat) ? e.cat : "Other",
+        date: e.date, note: String(e.note || "").slice(0, 80)
+    }));
+}
+
+let expenses = cleanExpenses(store.get("nexoraExpenses", []));
+let expMonth = todayStr().slice(0, 7);
+
+function saveExpenses() { store.set("nexoraExpenses", expenses); }
+const money = n => "Rs " + Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+function monthSpent() {
+    const m = todayStr().slice(0, 7);
+    return expenses.filter(e => e.type === "expense" && e.date.slice(0, 7) === m).reduce((a, e) => a + e.amount, 0);
+}
+
+function fillExpCats() {
+    $("#expCat").replaceChildren(...EXP_CATS[$("#expType").value].map(c =>
+        h("option", { value: c, text: (EXP_ICONS[c] || "") + " " + c })));
+}
+
+function renderExpenses() {
+    $("#expMonth").value = expMonth;
+    const items = expenses.filter(e => e.date.slice(0, 7) === expMonth)
+        .reverse()
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    const inc = items.filter(e => e.type === "income").reduce((a, e) => a + e.amount, 0);
+    const out = items.filter(e => e.type === "expense").reduce((a, e) => a + e.amount, 0);
+    const bal = inc - out;
+
+    const card = (ico, label, val, color) => h("div", { class: "stat" },
+        h("div", { class: "ico", text: ico }),
+        h("div", { class: "num", text: money(val), style: color ? "color:" + color : null }),
+        h("div", { class: "lbl", text: label }));
+    $("#expStats").replaceChildren(
+        card("💰", "Income", inc, "var(--ok)"),
+        card("💸", "Spent", out, "var(--danger)"),
+        card("🧮", "Balance", bal, bal < 0 ? "var(--danger)" : null));
+
+    const byCat = {};
+    items.filter(e => e.type === "expense").forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+    const rows = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    $("#expBars").replaceChildren(...(rows.length
+        ? rows.map(([cat, v]) => {
+            const pct = out ? Math.round(v / out * 100) : 0;
+            return h("div", { class: "bar-row" },
+                h("div", { class: "bar-top" },
+                    h("span", { text: (EXP_ICONS[cat] || "") + " " + cat }),
+                    h("span", { text: money(v) + " · " + pct + "%" })),
+                h("div", { class: "meter", style: "margin:6px 0 0" }, h("div", { style: "width:" + pct + "%" })));
+        })
+        : [h("div", { class: "empty" }, h("span", { class: "big", text: "🌱" }), "No spending recorded for this month.")]));
+
+    $("#expList").replaceChildren(...(items.length
+        ? items.map(e => {
+            const isInc = e.type === "income";
+            return h("li", { class: "task" },
+                h("div", { class: "t-main" },
+                    h("div", { class: "t-text", text: (EXP_ICONS[e.cat] || "") + " " + (e.note || e.cat) }),
+                    h("div", { class: "t-meta" },
+                        h("span", { class: "badge", text: e.cat }),
+                        h("span", { class: "badge", text: fmtDate(e.date) }))),
+                h("strong", { text: (isInc ? "+" : "−") + money(e.amount), style: "white-space:nowrap;color:" + (isInc ? "var(--ok)" : "var(--danger)") }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Delete",
+                    onclick: () => { expenses = expenses.filter(x => x.id !== e.id); saveExpenses(); renderExpenses(); toast("Deleted"); }
+                }));
+        })
+        : [h("li", { class: "empty" }, h("span", { class: "big", text: "💸" }), "Nothing here yet. Add your first entry above.")]));
+}
+
+$("#expType").addEventListener("change", fillExpCats);
+
+$("#expForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const amount = parseFloat($("#expAmount").value);
+    const date = $("#expDate").value;
+    const type = $("#expType").value === "income" ? "income" : "expense";
+    if (!Number.isFinite(amount) || amount <= 0 || amount >= 1e10) { toast("Enter a valid amount"); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { toast("Pick a date"); return; }
+    const cat = EXP_CATS[type].includes($("#expCat").value) ? $("#expCat").value : "Other";
+    expenses.push({
+        id: uid(), type, amount: Math.round(amount * 100) / 100, cat, date,
+        note: $("#expNote").value.trim().slice(0, 80)
+    });
+    saveExpenses();
+    expMonth = date.slice(0, 7);
+    $("#expAmount").value = "";
+    $("#expNote").value = "";
+    renderExpenses();
+    toast(type === "income" ? "Income added" : "Expense added");
+});
+
+$("#expMonth").addEventListener("change", e => {
+    if (/^\d{4}-\d{2}$/.test(e.target.value)) { expMonth = e.target.value; renderExpenses(); }
+});
+
+$("#expCsv").addEventListener("click", () => {
+    const items = expenses.filter(e => e.date.slice(0, 7) === expMonth).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    if (!items.length) { toast("Nothing to download for this month"); return; }
+    const q = v => {
+        let t = String(v);
+        if (/^[=+\-@\t\r]/.test(t)) t = "'" + t;
+        return '"' + t.replace(/"/g, '""') + '"';
+    };
+    const csv = ["Date,Type,Category,Note,Amount"]
+        .concat(items.map(e => [e.date, e.type, e.cat, q(e.note), e.amount].join(","))).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = h("a", { href: url, download: "nexora-expenses-" + expMonth + ".csv" });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("CSV downloaded");
+});
+
+$("#expDate").value = todayStr();
+
 /* ============ Init ============ */
 function refreshAll() {
     buildProfileForm();
     buildCVForm();
+    renderExpenses();
     buildDemo();
     renderProfileMeter();
     renderTasks();
@@ -1710,6 +1958,8 @@ buildProfileForm();
 buildDemo();
 buildWriter();
 buildCVForm();
+fillExpCats();
+renderExpenses();
 renderTasks();
 renderNotes();
 renderTimer();
