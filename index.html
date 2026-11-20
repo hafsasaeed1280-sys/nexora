@@ -689,6 +689,41 @@ kbd {
 .tour-actions { display: flex; gap: 8px; align-items: center; }
 #dashHabits .chip { display: inline-flex; gap: 6px; align-items: center; }
 
+/* ---------- Calendar ---------- */
+.btn-pair { display: flex; gap: 8px; }
+.cal-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.cal-head h2 { flex: 1; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-dow div { text-align: center; color: var(--muted); font-size: .78rem; padding: 4px 0; }
+.cal-day {
+    min-height: 62px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    border-radius: 12px; font: inherit; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between; padding: 8px 4px;
+}
+.cal-day:hover { border-color: var(--accent); }
+.cal-day.today { box-shadow: 0 0 0 2px var(--accent); }
+.cal-day.sel { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; }
+.dots { display: flex; gap: 3px; min-height: 8px; }
+.d { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.d.t { background: #8b5cf6; } .d.r { background: #f59e0b; } .d.h { background: #10b981; } .d.m { background: #ef4444; }
+.cal-day.sel .d { box-shadow: 0 0 0 1.5px #fff; }
+.cal-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; color: var(--muted); font-size: .8rem; }
+.cal-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-sec { margin-top: 16px; }
+.cal-sec h4 { margin: 0 0 6px; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+.cal-sec ul { list-style: none; margin: 0; padding: 0; }
+.cal-sec li { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.cal-sec li:last-child { border-bottom: 0; }
+.cal-sec li.done span { text-decoration: line-through; opacity: .6; }
+.cal-sec li .sp { flex: 1; overflow-wrap: anywhere; }
+.cal-sec li input[type=checkbox] { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+@media (max-width: 860px) {
+    .cal-grid { gap: 4px; }
+    .cal-day { min-height: 48px; padding: 6px 2px; font-size: .88rem; border-radius: 10px; }
+    .cal-head { flex-wrap: wrap; }
+    .cal-head h2 { order: -1; flex-basis: 100%; }
+}
+
 /* ---------- Print (CV) ---------- */
 @page { margin: 12mm; }
 @media print {
@@ -717,6 +752,7 @@ kbd {
         <button class="nav-btn" data-view="profile"><span class="ic">👤</span>Smart Profile</button>
         <button class="nav-btn" data-view="tasks"><span class="ic">✅</span>Tasks</button>
         <button class="nav-btn" data-view="reminders"><span class="ic">⏰</span>Reminders</button>
+        <button class="nav-btn" data-view="calendar"><span class="ic">📅</span>Calendar</button>
         <button class="nav-btn" data-view="habits"><span class="ic">🔥</span>Habits</button>
         <button class="nav-btn" data-view="expenses"><span class="ic">💰</span>Expenses</button>
         <button class="nav-btn" data-view="notes"><span class="ic">📝</span>Notes</button>
@@ -856,7 +892,10 @@ kbd {
                             <option value="monthly">Every month</option>
                         </select>
                     </div>
-                    <button class="btn primary" type="submit">Add</button>
+                    <div class="btn-pair">
+                        <button class="btn primary" type="submit" id="taskSave">Add</button>
+                        <button class="btn" type="button" id="taskCancel" hidden>Cancel</button>
+                    </div>
                 </form>
             </div>
 
@@ -909,6 +948,27 @@ kbd {
             <ul class="list" id="remList"></ul>
         </section>
 
+        <!-- Calendar -->
+        <section class="view" id="view-calendar">
+            <div class="card">
+                <div class="cal-head">
+                    <button class="btn" id="calPrev" type="button" aria-label="Previous month">‹</button>
+                    <h2 id="calTitle" style="margin:0"></h2>
+                    <button class="btn" id="calNext" type="button" aria-label="Next month">›</button>
+                    <button class="btn ghost" id="calToday" type="button">Today</button>
+                </div>
+                <div class="cal-grid cal-dow" id="calDow"></div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-legend">
+                    <span><i class="d t"></i>Task due</span>
+                    <span><i class="d r"></i>Reminder</span>
+                    <span><i class="d h"></i>Habit done</span>
+                    <span><i class="d m"></i>Spending</span>
+                </div>
+            </div>
+            <div class="card" id="calDay"></div>
+        </section>
+
         <!-- Habit Tracker -->
         <section class="view" id="view-habits">
             <div class="card">
@@ -955,7 +1015,7 @@ kbd {
                         </select>
                     </div>
                     <div>
-                        <label for="expAmount">Amount (Rs)</label>
+                        <label for="expAmount" id="expAmountLabel">Amount (Rs)</label>
                         <input id="expAmount" type="number" min="0.01" max="999999999" step="0.01" required placeholder="0" inputmode="decimal">
                     </div>
                     <div>
@@ -988,7 +1048,7 @@ kbd {
             <div class="card">
                 <h3 style="margin:0 0 10px">Monthly budget</h3>
                 <div class="inline">
-                    <input id="budgetInput" type="number" min="1" max="999999999" step="1" placeholder="e.g. 20000" inputmode="numeric" aria-label="Monthly budget in rupees">
+                    <input id="budgetInput" type="number" min="1" max="999999999" step="1" placeholder="e.g. 20000" inputmode="numeric" aria-label="Monthly budget amount">
                     <button class="btn primary" id="budgetSave" type="button">Set</button>
                     <button class="btn ghost" id="budgetClear" type="button">Remove</button>
                 </div>
@@ -1210,6 +1270,12 @@ kbd {
                 </div>
             </div>
             <div class="card">
+                <h2>Preferences</h2>
+                <p>Choose the currency used for expenses and budgets.</p>
+                <label for="currencySel">Currency</label>
+                <select id="currencySel" style="max-width:320px"></select>
+            </div>
+            <div class="card">
                 <h2>Welcome tour</h2>
                 <p>A quick guide to what Nexora can do. Great for showing the app to a friend.</p>
                 <button class="btn" id="tourBtn" type="button">Replay the tour</button>
@@ -1235,7 +1301,7 @@ kbd {
             </div>
             <div class="card">
                 <h2>About Nexora</h2>
-                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, reminders, online sync, quick search (Ctrl+K), a habit tracker and focus stats, an expense tracker with a budget, a CV builder, a message writer and a focus timer, all in one place.</p>
+                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, reminders, online sync, quick search (Ctrl+K), a calendar, a habit tracker and focus stats, an expense tracker with a budget, a CV builder, a message writer and a focus timer, all in one place.</p>
             </div>
         </section>
     <div class="modal tour" id="tourModal" hidden>
@@ -1291,7 +1357,7 @@ function h(tag, attrs, ...kids) {
 }
 
 /* Sync state (declared early because store.set uses it) */
-const SYNC_KEYS = ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses", "nexoraHabits", "nexoraBudget", "nexoraReminders"];
+const SYNC_KEYS = ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses", "nexoraHabits", "nexoraBudget", "nexoraReminders", "nexoraCurrency"];
 let syncApplying = false, cloudUser = null, syncTimer = null;
 let fb = null, cloudState = "loading", cloudMsg = "", lastSynced = 0, cloudUnsub = null;
 
@@ -1381,7 +1447,7 @@ let notes = cleanNotes(getNotes());
 /* ============ Navigation ============ */
 const TITLES = {
     dashboard: "Dashboard", profile: "Smart Profile", tasks: "Tasks",
-    notes: "Notes", reminders: "Reminders", habits: "Habit Tracker", expenses: "Expense Tracker", cv: "CV Builder", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
+    notes: "Notes", reminders: "Reminders", calendar: "Calendar", habits: "Habit Tracker", expenses: "Expense Tracker", cv: "CV Builder", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
 };
 
 function go(view) {
@@ -1398,6 +1464,7 @@ function go(view) {
     if (view === "expenses") renderExpenses();
     if (view === "habits") renderHabits();
     if (view === "reminders") renderReminders();
+    if (view === "calendar") renderCalendar();
     if (view === "focus") renderSessions();
 }
 
@@ -1628,8 +1695,16 @@ function renderTasks() {
                 h("button", {
                     class: "btn small", type: "button", text: "Edit",
                     onclick: () => {
-                        const v = prompt("Edit task", t.text);
-                        if (v && v.trim()) { t.text = v.trim().slice(0, 200); saveTasks(); renderTasks(); }
+                        editingTask = t.id;
+                        $("#taskInput").value = t.text;
+                        $("#taskPriority").value = t.priority || "medium";
+                        $("#taskDue").value = t.due || "";
+                        $("#taskRepeat").value = t.repeat || "";
+                        $("#taskSave").textContent = "Save";
+                        $("#taskCancel").hidden = false;
+                        go("tasks");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        $("#taskInput").focus();
                     }
                 }),
                 h("button", {
@@ -1651,21 +1726,33 @@ $("#taskForm").addEventListener("submit", e => {
     e.preventDefault();
     const text = $("#taskInput").value.trim();
     if (!text) return;
-    const repeat = $("#taskRepeat").value;
-    tasks.push({
-        id: uid(), text, done: false,
-        priority: $("#taskPriority").value,
-        due: $("#taskDue").value || (repeat ? todayStr() : ""),
-        repeat: ["daily", "weekly", "monthly"].includes(repeat) ? repeat : "", spawned: false
-    });
+    const repeat = ["daily", "weekly", "monthly"].includes($("#taskRepeat").value) ? $("#taskRepeat").value : "";
+    const due = $("#taskDue").value || (repeat ? todayStr() : "");
+    const pr = RANK[$("#taskPriority").value] !== undefined ? $("#taskPriority").value : "medium";
+    const cur = editingTask && tasks.find(x => x.id === editingTask);
+    if (cur) {
+        cur.text = text.slice(0, 200); cur.priority = pr; cur.due = due; cur.repeat = repeat;
+        toast("Task updated ✔");
+    } else {
+        tasks.push({ id: uid(), text: text.slice(0, 200), done: false, priority: pr, due, repeat, spawned: false });
+        toast("Task added");
+    }
     saveTasks();
+    resetTaskForm();
+    renderTasks();
+});
+
+let editingTask = null;
+function resetTaskForm() {
+    editingTask = null;
     $("#taskInput").value = "";
     $("#taskDue").value = "";
     $("#taskRepeat").value = "";
     $("#taskPriority").value = "medium";
-    renderTasks();
-    toast("Task added");
-});
+    $("#taskSave").textContent = "Add";
+    $("#taskCancel").hidden = true;
+}
+$("#taskCancel").addEventListener("click", resetTaskForm);
 
 function addToDate(str, repeat) {
     const [y, m, d] = str.split("-").map(Number);
@@ -2042,7 +2129,7 @@ $("#modes").addEventListener("click", e => {
 function snapshot() {
     return {
         app: "nexora", version: 1, exported: new Date().toISOString(),
-        profile: getProfile(), tasks, notes, cv, expenses, habits, budget, reminders, sessions: getSessions(),
+        profile: getProfile(), tasks, notes, cv, expenses, habits, budget, reminders, currency, sessions: getSessions(),
         theme: store.get("nexoraTheme", "dark")
     };
 }
@@ -2068,6 +2155,10 @@ function applyData(d, withTheme) {
     store.set("nexoraBudget", budget);
     reminders = cleanReminders(d.reminders);
     store.set("nexoraReminders", reminders);
+    currency = cleanCurrency(d.currency);
+    store.set("nexoraCurrency", currency);
+    $("#expAmountLabel").textContent = "Amount (" + currency + ")";
+    $("#currencySel").value = currency;
     store.set("nexoraProfile", cleanProfile);
     store.set("nexoraTasks", tasks);
     store.set("nexoraNotes", notes);
@@ -2112,8 +2203,8 @@ $("#resetBtn").addEventListener("click", () => {
     if (!confirm(cloudUser
         ? "Delete ALL your Nexora data from this device AND your online account? This cannot be undone."
         : "Delete ALL your Nexora data from this browser? This cannot be undone.")) return;
-    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses", "nexoraHabits", "nexoraBudget", "nexoraReminders"].forEach(k => localStorage.removeItem(k));
-    tasks = []; notes = []; cv = cleanCV({}); expenses = []; habits = []; budget = 0; reminders = [];
+    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses", "nexoraHabits", "nexoraBudget", "nexoraReminders", "nexoraCurrency"].forEach(k => localStorage.removeItem(k));
+    tasks = []; notes = []; cv = cleanCV({}); expenses = []; habits = []; budget = 0; reminders = []; currency = "Rs";
     markModified();
     refreshAll();
     toast("All data deleted");
@@ -2289,7 +2380,26 @@ let expenses = cleanExpenses(store.get("nexoraExpenses", []));
 let expMonth = todayStr().slice(0, 7);
 
 function saveExpenses() { store.set("nexoraExpenses", expenses); }
-const money = n => "Rs " + Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const CURRENCIES = [["Rs", "Pakistani Rupee (Rs)"], ["$", "US Dollar ($)"], ["€", "Euro (€)"], ["£", "British Pound (£)"], ["AED", "UAE Dirham (AED)"], ["SAR", "Saudi Riyal (SAR)"], ["₹", "Indian Rupee (₹)"]];
+const cleanCurrency = v => CURRENCIES.some(c => c[0] === v) ? v : "Rs";
+let currency = cleanCurrency(store.get("nexoraCurrency", "Rs"));
+const money = n => { const v = Number(n) || 0; return (v < 0 ? "-" : "") + currency + (/^[A-Za-z]+$/.test(currency) ? " " : "") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 2 }); };
+
+function applyCurrency() {
+    $("#expAmountLabel").textContent = "Amount (" + currency + ")";
+    $("#currencySel").value = currency;
+    renderExpenses();
+    renderDashboard();
+    renderCalendar();
+}
+
+$("#currencySel").replaceChildren(...CURRENCIES.map(([v, label]) => h("option", { value: v, text: label })));
+$("#currencySel").addEventListener("change", e => {
+    currency = cleanCurrency(e.target.value);
+    store.set("nexoraCurrency", currency);
+    applyCurrency();
+    toast("Currency updated ✔");
+});
 
 function monthSpent() {
     const m = todayStr().slice(0, 7);
@@ -2730,7 +2840,7 @@ function renderWeek() {
 }
 
 /* ============ Global search (Ctrl+K) ============ */
-const VIEW_ICONS = { dashboard: "🏠", profile: "👤", tasks: "✅", reminders: "⏰", habits: "🔥", expenses: "💰", notes: "📝", cv: "📄", writer: "✉️", focus: "⏱️", settings: "⚙️" };
+const VIEW_ICONS = { dashboard: "🏠", profile: "👤", tasks: "✅", reminders: "⏰", calendar: "📅", habits: "🔥", expenses: "💰", notes: "📝", cv: "📄", writer: "✉️", focus: "⏱️", settings: "⚙️" };
 let searchSel = 0, searchList = [], searchReturn = null;
 
 function buildSearch(q) {
@@ -2822,6 +2932,94 @@ document.addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); if ($("#searchModal").hidden) openSearch(); else closeSearch(); }
     else if (e.key === "/" && !typing && $("#searchModal").hidden) { e.preventDefault(); openSearch(); }
     else if (e.key === "Escape" && !$("#searchModal").hidden) closeSearch();
+});
+
+/* ============ Calendar ============ */
+let calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let calSel = todayStr();
+
+function renderCalendar() {
+    const y = calMonth.getFullYear(), m = calMonth.getMonth();
+    $("#calTitle").textContent = calMonth.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    $("#calDow").replaceChildren(...["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => h("div", { text: d })));
+    const offset = (new Date(y, m, 1).getDay() + 6) % 7;
+    const count = new Date(y, m + 1, 0).getDate();
+    const today = todayStr();
+    const cells = [];
+    for (let i = 0; i < offset; i++) cells.push(h("div", {}));
+    for (let d = 1; d <= count; d++) {
+        const key = dayKey(new Date(y, m, d));
+        const tk = tasks.filter(t => t.due === key).length;
+        const rm = reminders.filter(r => r.at.slice(0, 10) === key).length;
+        const hb = habits.filter(x => x.days.includes(key)).length;
+        const sp = expenses.some(e => e.type === "expense" && e.date === key);
+        const parts = [];
+        if (tk) parts.push(tk + (tk === 1 ? " task" : " tasks"));
+        if (rm) parts.push(rm + (rm === 1 ? " reminder" : " reminders"));
+        if (hb) parts.push(hb + (hb === 1 ? " habit done" : " habits done"));
+        if (sp) parts.push("spending");
+        cells.push(h("button", {
+            type: "button", class: "cal-day" + (key === today ? " today" : "") + (key === calSel ? " sel" : ""),
+            "aria-pressed": key === calSel ? "true" : "false",
+            "aria-label": new Date(y, m, d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) + (parts.length ? ": " + parts.join(", ") : ""),
+            onclick: () => { calSel = key; renderCalendar(); }
+        }, h("span", { text: String(d) }),
+            h("span", { class: "dots" }, ...[tk ? "t" : "", rm ? "r" : "", hb ? "h" : "", sp ? "m" : ""].filter(Boolean).map(c => h("i", { class: "d " + c })))));
+    }
+    $("#calGrid").replaceChildren(...cells);
+    renderCalDay();
+}
+
+function renderCalDay() {
+    const key = calSel;
+    const dt = new Date(key + "T00:00:00");
+    const box = $("#calDay");
+    const dayTasks = tasks.filter(t => t.due === key);
+    const dayRems = reminders.filter(r => r.at.slice(0, 10) === key).sort((a, b) => remTime(a) - remTime(b));
+    const doneHabits = habits.filter(x => x.days.includes(key));
+    const dayExp = expenses.filter(e => e.date === key);
+    const spent = dayExp.filter(e => e.type === "expense").reduce((a, e) => a + e.amount, 0);
+    const sec = (title, items, empty) => h("div", { class: "cal-sec" }, h("h4", { text: title }),
+        items.length ? h("ul", {}, ...items) : h("small", { text: empty }));
+
+    const form = h("form", { class: "inline", style: "margin-top:16px" },
+        h("input", { id: "calNewTask", required: true, maxlength: "200", placeholder: "Add a task for this day…", "aria-label": "New task for this day" }),
+        h("button", { class: "btn primary", type: "submit", text: "Add" }));
+    form.addEventListener("submit", e => {
+        e.preventDefault();
+        const text = form.querySelector("input").value.trim();
+        if (!text) return;
+        tasks.push({ id: uid(), text: text.slice(0, 200), done: false, priority: "medium", due: key, repeat: "", spawned: false });
+        saveTasks();
+        renderCalendar();
+        toast("Task added for " + fmtDate(key));
+    });
+
+    box.replaceChildren(
+        h("h3", { style: "margin:0", text: isNaN(dt) ? "" : dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + (key === todayStr() ? " · Today" : "") }),
+        sec("Tasks due", dayTasks.map(t => h("li", { class: t.done ? "done" : "" },
+            h("input", { type: "checkbox", checked: !!t.done, "aria-label": "Mark done", onchange: e => { completeTask(t, e.target.checked); renderCalendar(); } }),
+            h("span", { class: "sp", text: t.text }),
+            h("span", { class: "badge " + (t.priority || "medium"), text: t.priority || "medium" }))), "No tasks due."),
+        sec("Reminders", dayRems.map(r => h("li", {},
+            h("span", { text: r.fired ? "✅" : "⏰" }),
+            h("span", { class: "sp", text: r.text }),
+            h("span", { class: "badge", text: new Date(r.at).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }) }))), "No reminders."),
+        sec("Habits done", doneHabits.map(x => h("li", {}, h("span", { text: x.icon }), h("span", { class: "sp", text: x.name }))), "No habits ticked."),
+        sec("Money" + (spent ? " · spent " + money(spent) : ""), dayExp.map(e => h("li", {},
+            h("span", { text: EXP_ICONS[e.cat] || "💰" }),
+            h("span", { class: "sp", text: e.note || e.cat }),
+            h("span", { class: "badge", text: (e.type === "income" ? "+" : "−") + money(e.amount) }))), "No transactions."),
+        form);
+}
+
+$("#calPrev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); renderCalendar(); });
+$("#calNext").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1); renderCalendar(); });
+$("#calToday").addEventListener("click", () => {
+    const n = new Date();
+    calMonth = new Date(n.getFullYear(), n.getMonth(), 1);
+    calSel = todayStr();
+    renderCalendar();
 });
 
 /* ============ Welcome tour ============ */
@@ -3059,6 +3257,7 @@ function refreshAll() {
     renderExpenses();
     renderHabits();
     renderReminders();
+    renderCalendar();
     buildDemo();
     renderProfileMeter();
     renderTasks();
@@ -3087,6 +3286,7 @@ renderTimer();
 renderSessions();
 go(location.hash.slice(1) || "dashboard");
 renderSync();
+applyCurrency();
 initCloud();
 try { if (!localStorage.getItem("nexoraTourDone")) setTimeout(openTour, 700); } catch {}
 
