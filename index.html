@@ -529,6 +529,27 @@ textarea { resize: vertical; min-height: 100px; }
 
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ---------- Dashboard layout ---------- */
+#view-dashboard .hero { padding: 16px 22px; margin-bottom: 14px; }
+#view-dashboard .hero h1 { font-size: 1.45rem; margin: 0 0 2px; }
+#view-dashboard .stats { grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 14px; }
+#view-dashboard .stat { padding: 12px 14px; display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; }
+#view-dashboard .stat .ico { grid-row: 1 / 3; font-size: 1.5rem; margin: 0; }
+#view-dashboard .stat .num { font-size: 1.4rem; }
+#view-dashboard .stat .lbl { font-size: .78rem; margin-top: 0; }
+.dash-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 14px; align-items: stretch; }
+.dash-grid .card { margin-bottom: 0; }
+.dash-side { display: flex; flex-direction: column; gap: 14px; }
+.week-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.dash-week .bars { height: 150px; gap: 5px; }
+@media (max-width: 1180px) { #view-dashboard .stats { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 520px) { #view-dashboard .stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 860px) {
+    .dash-grid { grid-template-columns: 1fr; }
+    .week-pair { grid-template-columns: 1fr; }
+    .dash-week .bars { height: 120px; }
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 860px) {
     .app { grid-template-columns: 1fr; }
@@ -841,48 +862,35 @@ kbd {
 
             <div class="stats" id="stats"></div>
 
-            <div class="card">
-                <h3 style="margin:0 0 4px">This week</h3>
-                <p style="margin:0 0 14px">Your last 7 days at a glance.</p>
-                <div class="grid2">
-                    <div>
-                        <strong>Habits completed</strong>
-                        <div class="bars" id="weekHabits"></div>
-                    </div>
-                    <div>
-                        <strong>Money spent</strong>
-                        <div class="bars" id="weekSpend"></div>
+            <div class="dash-grid">
+                <div class="card dash-week">
+                    <h3 style="margin:0 0 2px">This week</h3>
+                    <p style="margin:0 0 6px">Your last 7 days at a glance.</p>
+                    <div class="week-pair">
+                        <div>
+                            <strong>Habits completed</strong>
+                            <div class="bars" id="weekHabits"></div>
+                        </div>
+                        <div>
+                            <strong>Money spent</strong>
+                            <div class="bars" id="weekSpend"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card">
-                <div class="inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
-                    <h3 style="margin:0">Today's habits</h3>
-                    <small id="dashHabitText"></small>
-                </div>
-                <div class="chips" id="dashHabits" style="margin-top:12px"></div>
-            </div>
-
-            <div class="grid2">
-                <div class="card">
-                    <h3>Up next</h3>
-                    <ul class="mini-list" id="upNext"></ul>
-                </div>
-                <div class="card">
-                    <h3>Quick tools</h3>
-                    <div class="tools">
-                        <button class="tool" data-go="profile"><span>👤</span>Smart Profile</button>
-                        <button class="tool" data-go="notes"><span>📝</span>Quick Notes</button>
-                        <button class="tool" data-go="writer"><span>✉️</span>Message Writer</button>
-                        <button class="tool" data-go="focus"><span>⏱️</span>Focus Timer</button>
-                        <button class="tool" data-go="cv"><span>📄</span>CV Builder</button>
-                        <button class="tool" data-go="expenses"><span>💰</span>Expense Tracker</button>
-                        <button class="tool" data-go="habits"><span>🔥</span>Habit Tracker</button>
-                        <button class="tool" data-go="reminders"><span>⏰</span>Reminders</button>
-                        <button class="tool" data-go="tasks"><span>✅</span>My Tasks</button>
+                <div class="dash-side">
+                    <div class="card">
+                        <div class="inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+                            <h3 style="margin:0">Today's habits</h3>
+                            <small id="dashHabitText"></small>
+                        </div>
+                        <div class="chips" id="dashHabits" style="margin-top:10px"></div>
                     </div>
-                    <p id="profileTip" style="margin:14px 0 0"></p>
+                    <div class="card">
+                        <h3>Up next</h3>
+                        <ul class="mini-list" id="upNext"></ul>
+                        <p id="profileTip" style="margin:10px 0 0;font-size:.85rem"></p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1591,7 +1599,6 @@ function renderDashboard() {
     const stats = [
         ["📌", pending, "Pending tasks"],
         ["✅", done, "Completed"],
-        ["📝", notes.length, "Notes saved"],
         ["⏰", upcomingCount(), "Upcoming reminders"],
         ["✨", habitsToday(), "Habits done today"],
         ["💸", money(monthSpent()), "Spent this month"],
