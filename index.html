@@ -78,29 +78,36 @@ small { color: var(--muted); }
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+    overflow: hidden;
 }
+.nav-scroll { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; min-height: 0; flex: 1; scrollbar-width: thin; }
+.nav-group { font-size: .68rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); opacity: .7; padding: 10px 12px 3px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-text small { font-size: .68rem; font-weight: 500; letter-spacing: .4px; color: var(--muted); margin-top: 3px; }
+.sidebar .more-btn, .more-sheet { display: none; }
 
 body::before {
     content: "";
     position: fixed;
-    right: -6vmin;
-    bottom: -6vmin;
-    width: min(70vmin, 640px);
-    height: min(70vmin, 640px);
+    top: 50%;
+    left: calc(250px + (100vw - 250px) / 2);
+    transform: translate(-50%, -50%);
+    width: min(70vmin, 600px);
+    height: min(70vmin, 600px);
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='256' cy='256' r='220' fill='none' stroke='url(%23g)' stroke-width='5' stroke-dasharray='1 15' stroke-linecap='round'/%3E%3Cpath d='M176 352V166L336 352V166' fill='none' stroke='url(%23g)' stroke-width='42' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='336' cy='150' r='27' fill='%23fbbf24'/%3E%3C/svg%3E") center/contain no-repeat;
-    opacity: .07;
+    opacity: .05;
     pointer-events: none;
     z-index: 0;
 }
-[data-theme="light"] body::before { opacity: .09; }
+[data-theme="light"] body::before { opacity: .08; }
 @media print { body::before { display: none; } }
 
 .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 6px 10px 20px;
+    gap: 12px;
+    padding: 4px 10px 14px;
     font-size: 1.35rem;
     font-weight: 700;
     letter-spacing: .3px;
@@ -123,7 +130,7 @@ body::before {
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 11px 12px;
+    padding: 7px 12px;
     background: transparent;
     color: var(--muted);
     border: none;
@@ -144,7 +151,7 @@ body::before {
     box-shadow: inset 3px 0 0 var(--accent);
 }
 
-.side-foot { margin-top: auto; padding: 10px; font-size: .8rem; color: var(--muted); }
+.side-foot { padding: 6px 10px 0; font-size: .8rem; color: var(--muted); }
 
 .content { padding: 28px clamp(16px, 4vw, 44px) 60px; max-width: 1100px; width: 100%; }
 
@@ -542,7 +549,17 @@ textarea { resize: vertical; min-height: 100px; }
         border-top: 1px solid var(--border);
     }
 
-    .brand, .side-foot { display: none; }
+    .brand, .side-foot, .nav-group, .mob-hide { display: none !important; }
+    .nav-scroll { flex-direction: row; overflow: visible; flex: 4; gap: 4px; }
+    .nav-scroll .nav-btn { flex: 1; min-width: 0; }
+    .sidebar { overflow: visible; }
+    .sidebar .more-btn { display: flex; flex: 1; min-width: 0; }
+    .more-sheet:not([hidden]) { display: block; position: fixed; left: 0; right: 0; bottom: 66px; z-index: 39; padding: 14px; background: var(--card); border-top: 1px solid var(--border); border-radius: 18px 18px 0 0; box-shadow: 0 -12px 40px rgba(0,0,0,.35); }
+    .more-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .more-grid button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; background: var(--card2); color: var(--text); border: 1px solid var(--border); border-radius: 12px; font-size: .72rem; cursor: pointer; }
+    .more-grid button span { font-size: 1.3rem; }
+    .more-grid button.active { border-color: var(--accent); }
+    body::before { left: 50%; }
 
     .nav-btn {
         flex-direction: column;
@@ -764,21 +781,41 @@ kbd {
 <div class="app">
 
     <aside class="sidebar" aria-label="Main navigation">
-        <div class="brand"><div class="logo"><svg viewBox="110 100 292 292" width="26" height="26" aria-hidden="true"><path d="M176 352V166L336 352V166" fill="none" stroke="#fff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/><circle cx="336" cy="150" r="40" fill="#fbbf24"/></svg></div> Nexora</div>
-        <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span>Dashboard</button>
-        <button class="nav-btn" data-view="profile"><span class="ic">👤</span>Smart Profile</button>
-        <button class="nav-btn" data-view="tasks"><span class="ic">✅</span>Tasks</button>
-        <button class="nav-btn" data-view="reminders"><span class="ic">⏰</span>Reminders</button>
-        <button class="nav-btn" data-view="calendar"><span class="ic">📅</span>Calendar</button>
-        <button class="nav-btn" data-view="habits"><span class="ic">🔥</span>Habits</button>
-        <button class="nav-btn" data-view="expenses"><span class="ic">💰</span>Expenses</button>
-        <button class="nav-btn" data-view="notes"><span class="ic">📝</span>Notes</button>
-        <button class="nav-btn" data-view="cv"><span class="ic">📄</span>CV Builder</button>
-        <button class="nav-btn" data-view="writer"><span class="ic">✉️</span>Writer</button>
-        <button class="nav-btn" data-view="focus"><span class="ic">⏱️</span>Focus</button>
-        <button class="nav-btn" data-view="settings"><span class="ic">⚙️</span>Settings</button>
+        <div class="brand"><div class="logo"><svg viewBox="110 100 292 292" width="26" height="26" aria-hidden="true"><path d="M176 352V166L336 352V166" fill="none" stroke="#fff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/><circle cx="336" cy="150" r="40" fill="#fbbf24"/></svg></div><span class="brand-text">Nexora<small>Smart Workspace</small></span></div>
+        <nav class="nav-scroll">
+        <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span><span class="lb">Dashboard</span></button>
+        <div class="nav-group">Plan</div>
+        <button class="nav-btn" data-view="tasks"><span class="ic">✅</span><span class="lb">Tasks</span></button>
+        <button class="nav-btn mob-hide" data-view="reminders"><span class="ic">⏰</span><span class="lb">Reminders</span></button>
+        <button class="nav-btn" data-view="calendar"><span class="ic">📅</span><span class="lb">Calendar</span></button>
+        <button class="nav-btn mob-hide" data-view="focus"><span class="ic">⏱️</span><span class="lb">Focus</span></button>
+        <div class="nav-group">Life</div>
+        <button class="nav-btn" data-view="habits"><span class="ic">🔥</span><span class="lb">Habits</span></button>
+        <button class="nav-btn mob-hide" data-view="expenses"><span class="ic">💰</span><span class="lb">Expenses</span></button>
+        <button class="nav-btn mob-hide" data-view="notes"><span class="ic">📝</span><span class="lb">Notes</span></button>
+        <div class="nav-group">Career</div>
+        <button class="nav-btn mob-hide" data-view="profile"><span class="ic">👤</span><span class="lb">Smart Profile</span></button>
+        <button class="nav-btn mob-hide" data-view="cv"><span class="ic">📄</span><span class="lb">CV Builder</span></button>
+        <button class="nav-btn mob-hide" data-view="writer"><span class="ic">✉️</span><span class="lb">Writer</span></button>
+        </nav>
+        <button class="nav-btn mob-hide" data-view="settings"><span class="ic">⚙️</span><span class="lb">Settings</span></button>
+        <button class="nav-btn more-btn" id="moreBtn" type="button" aria-haspopup="true" aria-expanded="false"><span class="ic">⋯</span><span class="lb">More</span></button>
         <div class="side-foot">© 2026 Nexora<br>Made with ❤️</div>
     </aside>
+
+
+    <div class="more-sheet" id="moreSheet" hidden>
+        <div class="more-grid">
+            <button data-view="reminders"><span>⏰</span>Reminders</button>
+            <button data-view="focus"><span>⏱️</span>Focus</button>
+            <button data-view="expenses"><span>💰</span>Expenses</button>
+            <button data-view="notes"><span>📝</span>Notes</button>
+            <button data-view="profile"><span>👤</span>Profile</button>
+            <button data-view="cv"><span>📄</span>CV Builder</button>
+            <button data-view="writer"><span>✉️</span>Writer</button>
+            <button data-view="settings"><span>⚙️</span>Settings</button>
+        </div>
+    </div>
 
     <main class="content">
         <div class="topbar">
@@ -1470,7 +1507,11 @@ const TITLES = {
 function go(view) {
     if (!TITLES[view]) view = "dashboard";
     $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + view));
-    $$(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    $$(".nav-btn[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    $$(".more-grid button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    const mb = $("#moreBtn"), ms = $("#moreSheet");
+    if (ms) { ms.hidden = true; mb.setAttribute("aria-expanded", "false"); }
+    if (mb) mb.classList.toggle("active", !!$(`.more-grid button[data-view="${view}"]`));
     $("#pageTitle").textContent = TITLES[view];
     if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
     window.scrollTo({ top: 0 });
@@ -1485,7 +1526,16 @@ function go(view) {
     if (view === "focus") renderSessions();
 }
 
-$$(".nav-btn").forEach(b => b.addEventListener("click", () => go(b.dataset.view)));
+$$(".nav-btn[data-view], .more-grid button").forEach(b => b.addEventListener("click", () => go(b.dataset.view)));
+$("#moreBtn").addEventListener("click", e => {
+    e.stopPropagation();
+    const ms = $("#moreSheet"); ms.hidden = !ms.hidden;
+    $("#moreBtn").setAttribute("aria-expanded", String(!ms.hidden));
+});
+document.addEventListener("click", e => {
+    const ms = $("#moreSheet");
+    if (ms && !ms.hidden && !ms.contains(e.target)) { ms.hidden = true; $("#moreBtn").setAttribute("aria-expanded", "false"); }
+});
 document.addEventListener("click", e => {
     const t = e.target.closest("[data-go]");
     if (t) go(t.dataset.go);
