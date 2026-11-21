@@ -1,0 +1,3359 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0b12">
+<meta name="description" content="Nexora - your smart digital workspace for profiles, tasks, notes, messages and focus.">
+<title>Nexora | Smart Digital Workspace</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='56' y='56' width='400' height='400' rx='108' fill='url(%23g)'/%3E%3Cpath d='M176 352V166L336 352V166' fill='none' stroke='%23fff' stroke-width='42' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='336' cy='150' r='44' fill='%23fbbf24' opacity='.28'/%3E%3Ccircle cx='336' cy='150' r='27' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nexora">
+
+<style>
+:root {
+    --bg: #0b0b12;
+    --card: #171622;
+    --card2: #1e1c2c;
+    --border: #2a2740;
+    --text: #f3f1fb;
+    --muted: #a7a3bd;
+    --accent: #8b5cf6;
+    --accent2: #6366f1;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    --radius: 16px;
+}
+
+[data-theme="light"] {
+    --bg: #f5f4fb;
+    --card: #ffffff;
+    --card2: #f3f1fb;
+    --border: #e3e0f2;
+    --text: #1c1a2e;
+    --muted: #6b6785;
+    --shadow: 0 10px 30px rgba(90, 70, 160, .12);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background .25s, color .25s;
+}
+
+h1, h2, h3 { margin: 0 0 8px; line-height: 1.25; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; }
+p { color: var(--muted); margin: 0 0 14px; }
+small { color: var(--muted); }
+
+/* ---------- Layout ---------- */
+.app {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 22px 16px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    right: -6vmin;
+    bottom: -6vmin;
+    width: min(70vmin, 640px);
+    height: min(70vmin, 640px);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='256' cy='256' r='220' fill='none' stroke='url(%23g)' stroke-width='5' stroke-dasharray='1 15' stroke-linecap='round'/%3E%3Cpath d='M176 352V166L336 352V166' fill='none' stroke='url(%23g)' stroke-width='42' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='336' cy='150' r='27' fill='%23fbbf24'/%3E%3C/svg%3E") center/contain no-repeat;
+    opacity: .07;
+    pointer-events: none;
+    z-index: 0;
+}
+[data-theme="light"] body::before { opacity: .09; }
+@media print { body::before { display: none; } }
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px 20px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+.logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(139, 92, 246, .45);
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 12px;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    border-radius: 11px;
+    font-size: .97rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+
+.nav-btn .ic { font-size: 1.15rem; width: 24px; text-align: center; }
+.nav-btn:hover { background: var(--card2); color: var(--text); }
+
+.nav-btn.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, .25), rgba(99, 102, 241, .18));
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.side-foot { margin-top: auto; padding: 10px; font-size: .8rem; color: var(--muted); }
+
+.content { padding: 28px clamp(16px, 4vw, 44px) 60px; max-width: 1100px; width: 100%; }
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.topbar h1 { margin: 0; }
+.date-chip {
+    font-size: .85rem;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 7px 13px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.view { display: none; animation: rise .3s ease; }
+.view.active { display: block; }
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---------- Components ---------- */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.grid2 .card { margin-bottom: 0; }
+
+.hero {
+    background: linear-gradient(135deg, rgba(139, 92, 246, .30), rgba(99, 102, 241, .14)), var(--card);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hero h1 { font-size: 1.7rem; }
+.hero p { margin: 0; max-width: 520px; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+}
+
+.stat .num { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+.stat .lbl { color: var(--muted); font-size: .88rem; margin-top: 4px; }
+.stat .ico { font-size: 1.3rem; margin-bottom: 6px; }
+
+.btn {
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    font-size: .93rem;
+    cursor: pointer;
+    transition: transform .1s, filter .15s, background .15s;
+}
+
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: scale(.97); }
+
+.btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn.danger { color: var(--danger); border-color: rgba(239, 68, 68, .45); }
+.btn.ghost { background: transparent; }
+.btn.small { padding: 7px 11px; font-size: .84rem; }
+
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+label { display: block; font-size: .87rem; font-weight: 600; margin: 12px 0 6px; }
+
+input, textarea, select {
+    width: 100%;
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: .95rem;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, .22);
+}
+
+textarea { resize: vertical; min-height: 100px; }
+
+.inline { display: flex; gap: 8px; align-items: center; }
+
+.icon-btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.icon-btn:hover { color: var(--text); border-color: var(--accent); }
+
+.meter { height: 8px; background: var(--card2); border-radius: 99px; overflow: hidden; margin-top: 18px; }
+.meter > div {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width .4s ease;
+}
+
+.filled { animation: flash .9s ease; }
+@keyframes flash {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .7); border-color: var(--ok); }
+    100% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+}
+
+/* ---------- Tasks ---------- */
+.task-add {
+    display: grid;
+    grid-template-columns: 1fr 130px 150px 140px auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.task-add label { margin-top: 0; }
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0 12px;
+}
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chip {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .86rem;
+}
+
+.chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.search { max-width: 220px; padding: 8px 12px; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+
+.task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.task input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.t-main { flex: 1; min-width: 0; }
+.t-text { overflow-wrap: anywhere; }
+.task.done .t-text { text-decoration: line-through; color: var(--muted); }
+
+.t-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+
+.badge {
+    font-size: .74rem;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+}
+
+.badge.high { color: var(--danger); border-color: rgba(239, 68, 68, .5); }
+.badge.medium { color: var(--warn); border-color: rgba(245, 158, 11, .5); }
+.badge.low { color: var(--ok); border-color: rgba(34, 197, 94, .5); }
+.badge.overdue { background: rgba(239, 68, 68, .15); color: var(--danger); border-color: rgba(239, 68, 68, .5); }
+
+.empty {
+    text-align: center;
+    padding: 28px 10px;
+    color: var(--muted);
+}
+
+.empty .big { font-size: 2.2rem; display: block; margin-bottom: 6px; }
+
+.mini-list { list-style: none; margin: 0; padding: 0; }
+.mini-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+.mini-list li:last-child { border-bottom: none; }
+
+.tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.tool {
+    padding: 14px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: .92rem;
+}
+.tool:hover { border-color: var(--accent); }
+.tool span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+
+/* ---------- Notes ---------- */
+.notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.note {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--shadow);
+}
+
+.note h3 { margin: 0; overflow-wrap: anywhere; }
+.note .body { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); font-size: .92rem; flex: 1; }
+.note .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---------- Writer ---------- */
+.output { min-height: 280px; font-family: inherit; }
+
+/* ---------- Focus ---------- */
+.timer-wrap { text-align: center; }
+.ring-box { position: relative; width: 240px; height: 240px; margin: 10px auto 20px; }
+.ring { width: 100%; height: 100%; }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+.ring-fg {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 565.49;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset .5s linear;
+}
+.time {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.modes { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.timer-wrap .row { justify-content: center; }
+
+/* ---------- CV Builder ---------- */
+.cv-section-title { display: flex; justify-content: space-between; align-items: center; margin: 22px 0 10px; }
+.cv-section-title h3 { margin: 0; }
+.cv-entry { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.cv-entry input, .cv-entry textarea { margin-bottom: 8px; }
+.cv-entry textarea { min-height: 64px; margin-bottom: 0; }
+.cv-entry-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.cv-scroll { overflow-x: auto; }
+
+.paper {
+    --cv: #7c3aed;
+    background: #fff;
+    color: #1c1a2e;
+    padding: 32px;
+    border-radius: 10px;
+    font-size: .88rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.paper .cv-head { text-align: center; margin-bottom: 16px; }
+.paper .cv-name { font-size: 1.7rem; font-weight: 800; letter-spacing: .3px; line-height: 1.2; }
+.paper .cv-title { font-size: 1rem; color: var(--cv); font-weight: 600; margin-top: 2px; }
+.paper .cv-contact { font-size: .82rem; color: #555; margin-top: 6px; }
+.paper .cv-sec { margin-top: 16px; }
+.paper .cv-sec h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: 1.4px; color: var(--cv); border-bottom: 2px solid var(--cv); padding-bottom: 3px; margin: 0 0 8px; }
+.paper .cv-item { margin-bottom: 10px; break-inside: avoid; }
+.paper .cv-row { display: flex; justify-content: space-between; gap: 10px; }
+.paper .cv-period { color: #666; font-size: .82rem; white-space: nowrap; }
+.paper .cv-sub { color: #444; font-style: italic; }
+.paper .cv-desc { white-space: pre-wrap; color: #333; margin-top: 2px; }
+.paper .cv-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.paper .cv-skill { border: 1px solid var(--cv); color: var(--cv); border-radius: 999px; padding: 1px 10px; font-size: .8rem; }
+.paper--modern .cv-head { text-align: left; background: var(--cv); margin: -32px -32px 18px; padding: 28px 32px; }
+.paper--modern .cv-name, .paper--modern .cv-title, .paper--modern .cv-contact { color: #fff; }
+.paper--modern .cv-title, .paper--modern .cv-contact { opacity: .92; }
+
+/* ---------- Toast ---------- */
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s;
+    z-index: 50;
+    max-width: 90vw;
+}
+
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+
+    .sidebar {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 66px;
+        z-index: 40;
+        flex-direction: row;
+        padding: 8px;
+        gap: 4px;
+        overflow-x: auto;
+        border-right: none;
+        border-top: 1px solid var(--border);
+    }
+
+    .brand, .side-foot { display: none; }
+
+    .nav-btn {
+        flex-direction: column;
+        gap: 2px;
+        min-width: 66px;
+        padding: 6px 8px;
+        font-size: .68rem;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .nav-btn.active { box-shadow: none; }
+    .content { padding-bottom: 100px; }
+    .task-add { grid-template-columns: 1fr 1fr; }
+    .task-add .wide { grid-column: 1 / -1; }
+    h1 { font-size: 1.5rem; }
+    .hero h1 { font-size: 1.4rem; }
+    .date-chip { display: none; }
+}
+
+/* ---------- Expense Tracker ---------- */
+.exp-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: end; }
+.exp-form label { margin-top: 0; }
+.exp-form .wide3 { grid-column: span 3; }
+.bar-row { margin-top: 14px; }
+.bar-top { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; }
+.bar-top span:last-child { color: var(--muted); white-space: nowrap; }
+.check { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-weight: 500; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--accent); }
+.paper--minimal .cv-head { text-align: left; border-bottom: 3px solid var(--cv); padding-bottom: 10px; }
+.paper--minimal .cv-name { color: var(--cv); }
+.paper--minimal .cv-sec h2 { color: #1c1a2e; border-bottom: 1px solid #ddd; }
+@media (max-width: 860px) {
+    .exp-form { grid-template-columns: 1fr 1fr; }
+    .exp-form .wide3 { grid-column: 1 / -1; }
+}
+
+/* ---------- Habit Tracker ---------- */
+.habit-add { display: grid; grid-template-columns: 1fr 150px auto; gap: 10px; align-items: end; }
+.habit-add label { margin-top: 0; }
+.habit { margin-bottom: 16px; }
+.habit-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.habit-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.habit-title strong { overflow-wrap: anywhere; font-size: 1.05rem; }
+.habit-ico { font-size: 1.5rem; }
+.habit-meta { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 14px; }
+.habit-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.day {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 8px 0; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--muted); cursor: pointer; font: inherit; font-size: .74rem;
+}
+.day b { font-size: 1rem; color: var(--text); }
+.day:hover { border-color: var(--accent); }
+.day.on { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; color: #fff; }
+.day.on b { color: #fff; }
+.day.today { box-shadow: 0 0 0 2px var(--accent); }
+#expList .badge { white-space: nowrap; }
+@media (max-width: 860px) {
+    .habit-add { grid-template-columns: 1fr 120px; }
+    .habit-add button { grid-column: 1 / -1; }
+    #expList .task { flex-wrap: wrap; }
+    #expList .t-main { flex: 1 1 100%; }
+    #expList .task strong { margin-right: auto; }
+}
+
+/* ---------- Reminders & weekly chart ---------- */
+.rem-add { display: grid; grid-template-columns: 1fr 230px auto; gap: 10px; align-items: end; }
+.rem-add label { margin-top: 0; }
+.task.rem-due { border-color: var(--warn); }
+.task.rem-done .t-text { text-decoration: line-through; opacity: .6; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 130px; margin-top: 12px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+.bar-col .val { font-size: .72rem; color: var(--muted); margin-bottom: 3px; white-space: nowrap; }
+.bar-col .col { width: 100%; max-width: 34px; min-height: 4px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--accent), var(--accent2)); transition: height .4s ease; }
+.bar-col .col.zero { background: var(--card2); }
+.bar-col .col.money { background: linear-gradient(180deg, var(--warn), #f97316); }
+.bar-col .lbl { font-size: .72rem; color: var(--muted); margin-top: 6px; }
+.bar-col.today .lbl { color: var(--text); font-weight: 700; }
+.rem-banner {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 200;
+    width: min(440px, calc(100vw - 32px)); padding: 14px 16px; border-radius: 14px;
+    background: var(--card); border: 1px solid var(--warn); box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    display: flex; align-items: center; gap: 12px; justify-content: space-between;
+}
+.rem-banner[hidden] { display: none; }
+@media (max-width: 860px) {
+    .rem-add { grid-template-columns: 1fr; }
+}
+
+/* ---------- Search, notes, repeat, charts ---------- */
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.search-btn {
+    display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: .85rem;
+    color: var(--muted); background: var(--card); border: 1px solid var(--border);
+    padding: 7px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+}
+.search-btn:hover { border-color: var(--accent); color: var(--text); }
+kbd {
+    font: inherit; font-size: .72rem; padding: 1px 6px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+}
+.modal {
+    position: fixed; inset: 0; z-index: 300; display: flex; justify-content: center; align-items: flex-start;
+    padding: 12vh 16px 16px; background: rgba(5, 5, 12, .6); backdrop-filter: blur(4px);
+}
+.modal[hidden] { display: none; }
+.modal-box {
+    width: min(600px, 100%); background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; box-shadow: 0 24px 70px rgba(0, 0, 0, .5); overflow: hidden;
+}
+.modal-box > input { width: 100%; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 16px 18px; font-size: 1.05rem; background: transparent; }
+.modal-box > input:focus { outline: none; box-shadow: none; }
+.results { list-style: none; margin: 0; padding: 6px; max-height: min(50vh, 380px); overflow-y: auto; }
+.results li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+.results li.sel { background: var(--card2); }
+.results .r-ico { font-size: 1.2rem; width: 26px; text-align: center; }
+.results .r-main { min-width: 0; flex: 1; }
+.results .r-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.results .r-sub { color: var(--muted); font-size: .78rem; }
+.results .r-none { color: var(--muted); padding: 18px; text-align: center; cursor: default; display: block; }
+.modal-foot { display: flex; gap: 16px; padding: 9px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .76rem; }
+
+.note-opts { display: grid; grid-template-columns: 160px 1fr; gap: 10px; }
+.note.pinned { border-color: var(--accent); }
+.note.c-purple { border-top: 4px solid #8b5cf6; }
+.note.c-blue { border-top: 4px solid #3b82f6; }
+.note.c-green { border-top: 4px solid #10b981; }
+.note.c-amber { border-top: 4px solid #f59e0b; }
+.note.c-red { border-top: 4px solid #ef4444; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+    font: inherit; font-size: .72rem; padding: 2px 9px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+}
+.tag:hover { border-color: var(--accent); color: var(--text); }
+
+.exp-compare { margin: -4px 0 18px; color: var(--muted); }
+.donut-wrap { display: flex; justify-content: center; margin: 10px 0 4px; }
+.donut-wrap svg { width: 170px; height: 170px; max-width: 100%; }
+.donut-wrap .d-total { fill: var(--text); font-size: 13px; font-weight: 700; }
+.donut-wrap .d-lbl { fill: var(--muted); font-size: 8px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+
+@media (max-width: 860px) {
+    .search-btn .st, .search-btn kbd { display: none; }
+    .search-btn { padding: 8px 11px; }
+    .note-opts { grid-template-columns: 1fr; }
+    .modal { padding-top: 8vh; }
+}
+
+/* ---------- Tour & focus stats ---------- */
+.modal.tour { align-items: center; padding-top: 16px; }
+.tour-box { padding: 28px 26px 22px; text-align: center; }
+.tour-ico { font-size: 3rem; line-height: 1; margin-bottom: 10px; }
+.tour-box h2 { margin: 0 0 8px; }
+.tour-box p { margin: 0 auto; max-width: 42ch; }
+.tour-dots { display: flex; justify-content: center; gap: 7px; margin: 20px 0 18px; }
+.tour-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--card2); border: 1px solid var(--border); }
+.tour-dots i.on { background: var(--accent); border-color: var(--accent); }
+.tour-actions { display: flex; gap: 8px; align-items: center; }
+#dashHabits .chip { display: inline-flex; gap: 6px; align-items: center; }
+
+/* ---------- Calendar ---------- */
+.btn-pair { display: flex; gap: 8px; }
+.cal-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.cal-head h2 { flex: 1; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal-dow div { text-align: center; color: var(--muted); font-size: .78rem; padding: 4px 0; }
+.cal-day {
+    min-height: 62px; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    border-radius: 12px; font: inherit; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between; padding: 8px 4px;
+}
+.cal-day:hover { border-color: var(--accent); }
+.cal-day.today { box-shadow: 0 0 0 2px var(--accent); }
+.cal-day.sel { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; }
+.dots { display: flex; gap: 3px; min-height: 8px; }
+.d { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.d.t { background: #8b5cf6; } .d.r { background: #f59e0b; } .d.h { background: #10b981; } .d.m { background: #ef4444; }
+.cal-day.sel .d { box-shadow: 0 0 0 1.5px #fff; }
+.cal-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; color: var(--muted); font-size: .8rem; }
+.cal-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-sec { margin-top: 16px; }
+.cal-sec h4 { margin: 0 0 6px; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+.cal-sec ul { list-style: none; margin: 0; padding: 0; }
+.cal-sec li { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.cal-sec li:last-child { border-bottom: 0; }
+.cal-sec li.done span { text-decoration: line-through; opacity: .6; }
+.cal-sec li .sp { flex: 1; overflow-wrap: anywhere; }
+.cal-sec li input[type=checkbox] { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+@media (max-width: 860px) {
+    .cal-grid { gap: 4px; }
+    .cal-day { min-height: 48px; padding: 6px 2px; font-size: .88rem; border-radius: 10px; }
+    .cal-head { flex-wrap: wrap; }
+    .cal-head h2 { order: -1; flex-basis: 100%; }
+}
+
+/* ---------- Print (CV) ---------- */
+@page { margin: 12mm; }
+@media print {
+    body { background: #fff; }
+    .app { display: block; }
+    .sidebar, .topbar, #toast, .no-print { display: none !important; }
+    .content { padding: 0; max-width: none; }
+    .view { display: none !important; }
+    #view-cv { display: block !important; animation: none; }
+    #view-cv .grid2 { display: block; }
+    #view-cv .cv-form-card { display: none !important; }
+    #view-cv .cv-preview-card { border: none; box-shadow: none; padding: 0; background: #fff; margin: 0; }
+    .cv-scroll { overflow: visible; }
+    .paper { padding: 0; border-radius: 0; }
+    .paper--modern .cv-head { margin: 0 0 14px; padding: 22px 24px; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+    <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand"><div class="logo"><svg viewBox="110 100 292 292" width="26" height="26" aria-hidden="true"><path d="M176 352V166L336 352V166" fill="none" stroke="#fff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/><circle cx="336" cy="150" r="40" fill="#fbbf24"/></svg></div> Nexora</div>
+        <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span>Dashboard</button>
+        <button class="nav-btn" data-view="profile"><span class="ic">👤</span>Smart Profile</button>
+        <button class="nav-btn" data-view="tasks"><span class="ic">✅</span>Tasks</button>
+        <button class="nav-btn" data-view="reminders"><span class="ic">⏰</span>Reminders</button>
+        <button class="nav-btn" data-view="calendar"><span class="ic">📅</span>Calendar</button>
+        <button class="nav-btn" data-view="habits"><span class="ic">🔥</span>Habits</button>
+        <button class="nav-btn" data-view="expenses"><span class="ic">💰</span>Expenses</button>
+        <button class="nav-btn" data-view="notes"><span class="ic">📝</span>Notes</button>
+        <button class="nav-btn" data-view="cv"><span class="ic">📄</span>CV Builder</button>
+        <button class="nav-btn" data-view="writer"><span class="ic">✉️</span>Writer</button>
+        <button class="nav-btn" data-view="focus"><span class="ic">⏱️</span>Focus</button>
+        <button class="nav-btn" data-view="settings"><span class="ic">⚙️</span>Settings</button>
+        <div class="side-foot">© 2026 Nexora<br>Made with ❤️</div>
+    </aside>
+
+    <main class="content">
+        <div class="topbar">
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="topbar-right">
+                <button class="search-btn" id="searchBtn" type="button" aria-label="Search Nexora"><span aria-hidden="true">🔍</span><span class="st">Search</span><kbd>Ctrl K</kbd></button>
+                <span class="date-chip" id="dateChip"></span>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <section class="view" id="view-dashboard">
+            <div class="card hero">
+                <div>
+                    <h1 id="greet">Welcome</h1>
+                    <p id="heroSub">Your everyday digital tasks, organised in one place.</p>
+                </div>
+                <div class="row" style="margin:0">
+                    <button class="btn primary" data-go="tasks">+ New task</button>
+                    <button class="btn" data-go="writer">Write a message</button>
+                </div>
+            </div>
+
+            <div class="stats" id="stats"></div>
+
+            <div class="card">
+                <h3 style="margin:0 0 4px">This week</h3>
+                <p style="margin:0 0 14px">Your last 7 days at a glance.</p>
+                <div class="grid2">
+                    <div>
+                        <strong>Habits completed</strong>
+                        <div class="bars" id="weekHabits"></div>
+                    </div>
+                    <div>
+                        <strong>Money spent</strong>
+                        <div class="bars" id="weekSpend"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+                    <h3 style="margin:0">Today's habits</h3>
+                    <small id="dashHabitText"></small>
+                </div>
+                <div class="chips" id="dashHabits" style="margin-top:12px"></div>
+            </div>
+
+            <div class="grid2">
+                <div class="card">
+                    <h3>Up next</h3>
+                    <ul class="mini-list" id="upNext"></ul>
+                </div>
+                <div class="card">
+                    <h3>Quick tools</h3>
+                    <div class="tools">
+                        <button class="tool" data-go="profile"><span>👤</span>Smart Profile</button>
+                        <button class="tool" data-go="notes"><span>📝</span>Quick Notes</button>
+                        <button class="tool" data-go="writer"><span>✉️</span>Message Writer</button>
+                        <button class="tool" data-go="focus"><span>⏱️</span>Focus Timer</button>
+                        <button class="tool" data-go="cv"><span>📄</span>CV Builder</button>
+                        <button class="tool" data-go="expenses"><span>💰</span>Expense Tracker</button>
+                        <button class="tool" data-go="habits"><span>🔥</span>Habit Tracker</button>
+                        <button class="tool" data-go="reminders"><span>⏰</span>Reminders</button>
+                        <button class="tool" data-go="tasks"><span>✅</span>My Tasks</button>
+                    </div>
+                    <p id="profileTip" style="margin:14px 0 0"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart Profile -->
+        <section class="view" id="view-profile">
+            <div class="grid2">
+                <div class="card">
+                    <h2>My Profile</h2>
+                    <p>Save your details once and reuse them anywhere. Tap the copy button next to any field.</p>
+                    <form id="profileForm">
+                        <div id="profileFields"></div>
+                        <div class="row">
+                            <button class="btn primary" type="submit">Save profile</button>
+                            <button class="btn" type="button" id="copyAll">Copy all details</button>
+                            <button class="btn ghost danger" type="button" id="clearProfile">Clear</button>
+                        </div>
+                    </form>
+                    <div class="meter"><div id="meterBar"></div></div>
+                    <small id="meterText"></small>
+                </div>
+
+                <div class="card">
+                    <h2>Try Smart Autofill</h2>
+                    <p>This sample form shows how Nexora fills details from your saved profile.</p>
+                    <div id="demoFields"></div>
+                    <div class="row">
+                        <button class="btn primary" type="button" id="autofillBtn">Autofill from saved profile</button>
+                        <button class="btn" type="button" id="demoReset">Reset form</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks -->
+        <section class="view" id="view-tasks">
+            <div class="card">
+                <form id="taskForm" class="task-add">
+                    <div class="wide">
+                        <label for="taskInput">New task</label>
+                        <input id="taskInput" required maxlength="200" placeholder="e.g. Complete my application">
+                    </div>
+                    <div>
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taskDue">Due date</label>
+                        <input id="taskDue" type="date">
+                    </div>
+                    <div>
+                        <label for="taskRepeat">Repeat</label>
+                        <select id="taskRepeat">
+                            <option value="">Never</option>
+                            <option value="daily">Every day</option>
+                            <option value="weekly">Every week</option>
+                            <option value="monthly">Every month</option>
+                        </select>
+                    </div>
+                    <div class="btn-pair">
+                        <button class="btn primary" type="submit" id="taskSave">Add</button>
+                        <button class="btn" type="button" id="taskCancel" hidden>Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="meter" style="margin:0 0 6px"><div id="taskBar"></div></div>
+                <small id="taskCount"></small>
+
+                <div class="toolbar">
+                    <div class="chips" id="taskFilters">
+                        <button class="chip active" data-filter="all">All</button>
+                        <button class="chip" data-filter="active">Active</button>
+                        <button class="chip" data-filter="done">Done</button>
+                    </div>
+                    <input class="search" id="taskSearch" type="search" placeholder="Search tasks…" aria-label="Search tasks">
+                </div>
+
+                <ul class="list" id="taskList"></ul>
+                <div class="row">
+                    <button class="btn" id="clearDone" type="button">Clear completed</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reminders -->
+        <section class="view" id="view-reminders">
+            <div class="card">
+                <form id="remForm" class="rem-add">
+                    <div>
+                        <label for="remText">Remind me to</label>
+                        <input id="remText" required maxlength="100" placeholder="e.g. Submit assignment">
+                    </div>
+                    <div>
+                        <label for="remAt">When</label>
+                        <input id="remAt" type="datetime-local" required>
+                    </div>
+                    <button class="btn primary" type="submit">Add</button>
+                </form>
+            </div>
+
+            <div class="card" id="remPerm">
+                <div class="inline" style="justify-content:space-between;flex-wrap:wrap">
+                    <div>
+                        <strong id="remPermTitle">Notifications</strong>
+                        <small id="remPermText" style="display:block;margin-top:2px"></small>
+                    </div>
+                    <button class="btn" id="remPermBtn" type="button">Turn on notifications</button>
+                </div>
+            </div>
+
+            <ul class="list" id="remList"></ul>
+        </section>
+
+        <!-- Calendar -->
+        <section class="view" id="view-calendar">
+            <div class="card">
+                <div class="cal-head">
+                    <button class="btn" id="calPrev" type="button" aria-label="Previous month">‹</button>
+                    <h2 id="calTitle" style="margin:0"></h2>
+                    <button class="btn" id="calNext" type="button" aria-label="Next month">›</button>
+                    <button class="btn ghost" id="calToday" type="button">Today</button>
+                </div>
+                <div class="cal-grid cal-dow" id="calDow"></div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-legend">
+                    <span><i class="d t"></i>Task due</span>
+                    <span><i class="d r"></i>Reminder</span>
+                    <span><i class="d h"></i>Habit done</span>
+                    <span><i class="d m"></i>Spending</span>
+                </div>
+            </div>
+            <div class="card" id="calDay"></div>
+        </section>
+
+        <!-- Habit Tracker -->
+        <section class="view" id="view-habits">
+            <div class="card">
+                <form id="habitForm" class="habit-add">
+                    <div>
+                        <label for="habitName">New habit</label>
+                        <input id="habitName" required maxlength="40" placeholder="e.g. Drink 8 glasses of water">
+                    </div>
+                    <div>
+                        <label for="habitIcon">Icon</label>
+                        <select id="habitIcon">
+                            <option value="💧">💧 Water</option>
+                            <option value="📚">📚 Study</option>
+                            <option value="🕌">🕌 Prayer</option>
+                            <option value="🏃">🏃 Exercise</option>
+                            <option value="😴">😴 Sleep</option>
+                            <option value="🥗">🥗 Healthy food</option>
+                            <option value="✍️">✍️ Writing</option>
+                            <option value="💻">💻 Coding</option>
+                            <option value="⭐">⭐ Other</option>
+                        </select>
+                    </div>
+                    <button class="btn primary" type="submit">Add</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3 id="habitSummary" style="margin:0 0 4px"></h3>
+                <div class="meter" style="margin-top:10px"><div id="habitBar"></div></div>
+            </div>
+
+            <div id="habitList"></div>
+        </section>
+
+        <!-- Expense Tracker -->
+        <section class="view" id="view-expenses">
+            <div class="card">
+                <form id="expForm" class="exp-form">
+                    <div>
+                        <label for="expType">Type</label>
+                        <select id="expType">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="expAmount" id="expAmountLabel">Amount (Rs)</label>
+                        <input id="expAmount" type="number" min="0.01" max="999999999" step="0.01" required placeholder="0" inputmode="decimal">
+                    </div>
+                    <div>
+                        <label for="expCat">Category</label>
+                        <select id="expCat"></select>
+                    </div>
+                    <div>
+                        <label for="expDate">Date</label>
+                        <input id="expDate" type="date" required>
+                    </div>
+                    <div class="wide3">
+                        <label for="expNote">Note (optional)</label>
+                        <input id="expNote" maxlength="80" placeholder="e.g. Lunch with friends">
+                    </div>
+                    <button class="btn primary" type="submit">Add</button>
+                </form>
+            </div>
+
+            <div class="toolbar" style="margin-top:0">
+                <div class="inline">
+                    <label for="expMonth" style="margin:0">Month</label>
+                    <input id="expMonth" type="month" style="width:auto">
+                </div>
+                <button class="btn" id="expCsv" type="button">Download CSV</button>
+            </div>
+
+            <div class="stats" id="expStats"></div>
+            <p id="expCompare" class="exp-compare"></p>
+
+            <div class="card">
+                <h3 style="margin:0 0 10px">Monthly budget</h3>
+                <div class="inline">
+                    <input id="budgetInput" type="number" min="1" max="999999999" step="1" placeholder="e.g. 20000" inputmode="numeric" aria-label="Monthly budget amount">
+                    <button class="btn primary" id="budgetSave" type="button">Set</button>
+                    <button class="btn ghost" id="budgetClear" type="button">Remove</button>
+                </div>
+                <div class="meter" style="margin-top:14px"><div id="budgetBar"></div></div>
+                <small id="budgetText" style="display:block;margin-top:6px"></small>
+            </div>
+
+            <div class="card">
+                <h3>Last 6 months</h3>
+                <p style="margin:0">Money spent each month.</p>
+                <div class="bars" id="expTrend"></div>
+            </div>
+
+            <div class="grid2">
+                <div class="card">
+                    <h3>Where your money went</h3>
+                    <div class="donut-wrap" id="expDonut"></div>
+                    <div id="expBars"></div>
+                </div>
+                <div class="card">
+                    <h3>Transactions</h3>
+                    <ul class="list" id="expList"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Notes -->
+        <section class="view" id="view-notes">
+            <div class="card">
+                <h2 id="noteFormTitle">New note</h2>
+                <form id="noteForm">
+                    <label for="noteTitle">Title</label>
+                    <input id="noteTitle" maxlength="80" placeholder="Note title">
+                    <label for="noteBody">Note</label>
+                    <textarea id="noteBody" maxlength="4000" placeholder="Write anything you want to remember…"></textarea>
+                    <div class="note-opts">
+                        <div>
+                            <label for="noteColor">Colour</label>
+                            <select id="noteColor">
+                                <option value="">Default</option>
+                                <option value="purple">Purple</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="amber">Amber</option>
+                                <option value="red">Red</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="noteTags">Tags (comma separated)</label>
+                            <input id="noteTags" maxlength="80" placeholder="e.g. study, ideas">
+                        </div>
+                    </div>
+                    <label class="check"><input type="checkbox" id="notePin"> Pin this note to the top</label>
+                    <div class="row">
+                        <button class="btn primary" type="submit" id="noteSave">Save note</button>
+                        <button class="btn" type="button" id="noteCancel" hidden>Cancel edit</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card">
+                <input class="search" id="noteSearch" type="search" placeholder="Search notes, or type #tag…" aria-label="Search notes" style="max-width:none;width:100%">
+            </div>
+            <div class="notes" id="notesGrid"></div>
+        </section>
+
+        <!-- CV Builder -->
+        <section class="view" id="view-cv">
+            <div class="grid2">
+                <div class="card cv-form-card">
+                    <h2>Build your CV</h2>
+                    <p>Your name and contact details come from your Smart Profile. Fill in the rest and your CV updates live.</p>
+                    <button class="btn small" type="button" data-go="profile">Edit profile details</button>
+
+                    <label for="cvTitle">Job title / headline</label>
+                    <input id="cvTitle" maxlength="100" placeholder="e.g. Junior Web Developer">
+
+                    <label for="cvSummary">Short summary</label>
+                    <textarea id="cvSummary" maxlength="600" placeholder="Two or three lines about you and what you are looking for"></textarea>
+
+                    <label for="cvSkills">Skills (separate with commas)</label>
+                    <input id="cvSkills" maxlength="400" placeholder="HTML, CSS, JavaScript, Communication">
+
+                    <label for="cvLanguages">Languages (separate with commas)</label>
+                    <input id="cvLanguages" maxlength="200" placeholder="Urdu, English">
+
+                    <div class="cv-section-title"><h3>Experience</h3><button class="btn small" type="button" data-cvadd="exp">+ Add</button></div>
+                    <div id="cvList-exp"></div>
+
+                    <div class="cv-section-title"><h3>Education</h3><button class="btn small" type="button" data-cvadd="edu">+ Add</button></div>
+                    <div id="cvList-edu"></div>
+
+                    <div class="cv-section-title"><h3>Projects</h3><button class="btn small" type="button" data-cvadd="proj">+ Add</button></div>
+                    <div id="cvList-proj"></div>
+
+                    <div class="cv-section-title"><h3>Certificates</h3><button class="btn small" type="button" data-cvadd="cert">+ Add</button></div>
+                    <div id="cvList-cert"></div>
+
+                    <div class="cv-section-title"><h3>Show on CV</h3></div>
+                    <p>Choose which contact details appear. Your home address is hidden by default, for your safety.</p>
+                    <label class="check"><input type="checkbox" data-cvshow="email"> Email</label>
+                    <label class="check"><input type="checkbox" data-cvshow="phone"> Phone</label>
+                    <label class="check"><input type="checkbox" data-cvshow="city"> City</label>
+                    <label class="check"><input type="checkbox" data-cvshow="address"> Full address</label>
+                    <label class="check"><input type="checkbox" data-cvshow="linkedin"> LinkedIn / website</label>
+
+                    <div class="cv-section-title"><h3>Look</h3></div>
+                    <div class="grid2" style="gap:12px">
+                        <div>
+                            <label for="cvTemplate" style="margin-top:0">Template</label>
+                            <select id="cvTemplate">
+                                <option value="classic">Classic</option>
+                                <option value="modern">Modern</option>
+                                <option value="minimal">Minimal</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cvAccent" style="margin-top:0">Colour</label>
+                            <select id="cvAccent">
+                                <option value="#7c3aed">Purple</option>
+                                <option value="#2563eb">Blue</option>
+                                <option value="#059669">Green</option>
+                                <option value="#dc2626">Red</option>
+                                <option value="#111827">Black</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card cv-preview-card">
+                    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+                        <h3 style="margin:0">Live preview</h3>
+                        <button class="btn primary" id="cvPrint" type="button">Print / Save as PDF</button>
+                    </div>
+                    <p class="no-print" id="cvHint"></p>
+                    <p class="no-print"><small>In the print window, choose "Save as PDF" as the destination.</small></p>
+                    <div class="cv-scroll"><div id="cvPaper"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Message Writer -->
+        <section class="view" id="view-writer">
+            <div class="grid2">
+                <div class="card">
+                    <h2>Message Writer</h2>
+                    <p>Pick a template, fill in a few details, and Nexora prepares a ready-to-send message using your profile.</p>
+                    <label for="tplSelect">Template</label>
+                    <select id="tplSelect"></select>
+                    <div id="tplFields"></div>
+                    <p id="writerHint" style="margin-top:14px"></p>
+                </div>
+                <div class="card">
+                    <h3>Your message</h3>
+                    <textarea id="writerOut" class="output" aria-label="Generated message"></textarea>
+                    <div class="row">
+                        <button class="btn primary" id="writerCopy" type="button">Copy message</button>
+                        <button class="btn" id="writerMail" type="button">Open in email</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Focus -->
+        <section class="view" id="view-focus">
+            <div class="grid2">
+                <div class="card timer-wrap">
+                    <h2>Focus Timer</h2>
+                    <p>Work in short, focused sessions with breaks in between.</p>
+                    <div class="modes" id="modes">
+                        <button class="chip active" data-mode="focus">Focus 25</button>
+                        <button class="chip" data-mode="short">Short break 5</button>
+                        <button class="chip" data-mode="long">Long break 15</button>
+                    </div>
+                    <div class="ring-box">
+                        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+                            <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
+                            <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="90" transform="rotate(-90 100 100)"></circle>
+                        </svg>
+                        <div class="time" id="timeText" role="timer">25:00</div>
+                    </div>
+                    <div class="row">
+                        <button class="btn primary" id="timerStart" type="button">Start</button>
+                        <button class="btn" id="timerReset" type="button">Reset</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Today</h3>
+                    <div class="stat" style="box-shadow:none;margin-top:10px">
+                        <div class="ico">🔥</div>
+                        <div class="num" id="sessionsToday">0</div>
+                        <div class="lbl">focus sessions completed today</div>
+                    </div>
+                    <p style="margin-top:16px">Tip: pick one task from your list, start the timer, and keep your phone away until it rings.</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="margin:0 0 4px">Your focus this week</h3>
+                <p style="margin:0 0 14px">Completed focus sessions over the last 7 days.</p>
+                <div class="stats" id="focusStats"></div>
+                <div class="bars" id="focusBars"></div>
+            </div>
+        </section>
+
+        <!-- Settings -->
+        <section class="view" id="view-settings">
+            <div class="card" id="installCard">
+                <h2>Install Nexora</h2>
+                <p id="installText">Install Nexora as an app on this device. It opens in its own window and works offline.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="installBtn" type="button" hidden>Install app</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Appearance</h2>
+                <p>Choose how Nexora looks.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn" id="themeDark" type="button">🌙 Dark</button>
+                    <button class="btn" id="themeLight" type="button">☀️ Light</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Preferences</h2>
+                <p>Choose the currency used for expenses and budgets.</p>
+                <label for="currencySel">Currency</label>
+                <select id="currencySel" style="max-width:320px"></select>
+            </div>
+            <div class="card">
+                <h2>Welcome tour</h2>
+                <p>A quick guide to what Nexora can do. Great for showing the app to a friend.</p>
+                <button class="btn" id="tourBtn" type="button">Replay the tour</button>
+            </div>
+            <div class="card" id="syncCard">
+                <h2>Account &amp; sync</h2>
+                <p id="syncText">Connecting…</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="syncIn" type="button" hidden>Sign in with Google</button>
+                    <button class="btn" id="syncNow" type="button" hidden>Sync now</button>
+                    <button class="btn" id="syncOut" type="button" hidden>Sign out</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Your data</h2>
+                <p>Your data lives in this browser, and in your private online account if you sign in above. A backup file is still a good extra copy.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="exportBtn" type="button">Download backup</button>
+                    <button class="btn" id="importBtn" type="button">Restore from backup</button>
+                    <button class="btn danger" id="resetBtn" type="button">Delete all data</button>
+                </div>
+                <input type="file" id="importFile" accept="application/json" hidden>
+            </div>
+            <div class="card">
+                <h2>About Nexora</h2>
+                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, reminders, online sync, quick search (Ctrl+K), a calendar, a habit tracker and focus stats, an expense tracker with a budget, a CV builder, a message writer and a focus timer, all in one place.</p>
+            </div>
+        </section>
+    <div class="modal tour" id="tourModal" hidden>
+        <div class="modal-box tour-box" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+            <div class="tour-ico" id="tourIco" aria-hidden="true"></div>
+            <h2 id="tourTitle"></h2>
+            <p id="tourText"></p>
+            <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+            <div class="tour-actions">
+                <button class="btn ghost" id="tourSkip" type="button">Skip</button>
+                <span style="flex:1"></span>
+                <button class="btn" id="tourBack" type="button">Back</button>
+                <button class="btn primary" id="tourNext" type="button">Next</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="searchModal" hidden>
+        <div class="modal-box" role="dialog" aria-modal="true" aria-label="Search Nexora">
+            <input id="searchInput" type="search" placeholder="Search tasks, notes, habits, expenses… or jump to a page" autocomplete="off" aria-label="Search">
+            <ul class="results" id="searchResults" role="listbox"></ul>
+            <div class="modal-foot"><span>↑ ↓ move</span><span>Enter open</span><span>Esc close</span></div>
+        </div>
+    </div>
+    <div class="rem-banner" id="remBanner" role="alert" hidden></div>
+</main>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ============ Helpers ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+function h(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    for (const k in (attrs || {})) {
+        const v = attrs[k];
+        if (v == null || v === false) continue;
+        if (k === "class") e.className = v;
+        else if (k === "text") e.textContent = v;
+        else if (k === "value" || k === "checked" || k === "disabled") e[k] = v;
+        else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+        else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (const c of kids.flat()) {
+        if (c == null || c === false) continue;
+        e.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    }
+    return e;
+}
+
+/* Sync state (declared early because store.set uses it) */
+const SYNC_KEYS = ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses", "nexoraHabits", "nexoraBudget", "nexoraReminders", "nexoraCurrency"];
+let syncApplying = false, cloudUser = null, syncTimer = null;
+let fb = null, cloudState = "loading", cloudMsg = "", lastSynced = 0, cloudUnsub = null;
+
+const store = {
+    get(key, fallback) {
+        try {
+            const v = JSON.parse(localStorage.getItem(key));
+            return v === null || v === undefined ? fallback : v;
+        } catch { return fallback; }
+    },
+    set(key, val) {
+        try { localStorage.setItem(key, JSON.stringify(val)); }
+        catch { toast("Could not save (storage is full or blocked)"); return; }
+        if (!syncApplying && SYNC_KEYS.includes(key)) markModified();
+    }
+};
+
+let toastTimer;
+function toast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        toast("Copied!");
+    } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.append(ta);
+        ta.select();
+        try { document.execCommand("copy"); toast("Copied!"); }
+        catch { toast("Copy is not available here"); }
+        ta.remove();
+    }
+}
+
+const todayStr = () => new Date().toLocaleDateString("en-CA");
+
+function fmtDate(s) {
+    if (!s) return "[date]";
+    const d = new Date(s + "T00:00:00");
+    return isNaN(d) ? "[date]" : d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+/* ============ Data ============ */
+const FIELDS = [
+    { id: "name", label: "Full name", type: "text", ph: "Your full name", req: true },
+    { id: "email", label: "Email", type: "email", ph: "name@example.com", req: true },
+    { id: "phone", label: "Phone", type: "tel", ph: "+92 300 0000000" },
+    { id: "address", label: "Address", type: "text", ph: "House / street / area" },
+    { id: "city", label: "City", type: "text", ph: "Your city" },
+    { id: "dob", label: "Date of birth", type: "date" },
+    { id: "education", label: "Education", type: "text", ph: "e.g. BS Computer Science" },
+    { id: "linkedin", label: "LinkedIn / website", type: "url", ph: "https://" }
+];
+
+function getProfile() {
+    const p = store.get("nexoraProfile", {});
+    return p && typeof p === "object" && !Array.isArray(p) ? p : {};
+}
+
+function getTasks() {
+    const t = store.get("nexoraTasks", []);
+    return Array.isArray(t) ? t.filter(x => x && typeof x.text === "string") : [];
+}
+
+function getNotes() {
+    const n = store.get("nexoraNotes", []);
+    return Array.isArray(n) ? n.filter(x => x && typeof x === "object") : [];
+}
+
+const getSessions = () => {
+    const s = store.get("nexoraSessions", {});
+    return s && typeof s === "object" && !Array.isArray(s) ? s : {};
+};
+
+let tasks = getTasks();
+let notes = cleanNotes(getNotes());
+
+/* ============ Navigation ============ */
+const TITLES = {
+    dashboard: "Dashboard", profile: "Smart Profile", tasks: "Tasks",
+    notes: "Notes", reminders: "Reminders", calendar: "Calendar", habits: "Habit Tracker", expenses: "Expense Tracker", cv: "CV Builder", writer: "Message Writer", focus: "Focus Timer", settings: "Settings"
+};
+
+function go(view) {
+    if (!TITLES[view]) view = "dashboard";
+    $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + view));
+    $$(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    $("#pageTitle").textContent = TITLES[view];
+    if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
+    window.scrollTo({ top: 0 });
+    if (view === "dashboard") renderDashboard();
+    if (view === "profile") renderProfileMeter();
+    if (view === "writer") generateMessage();
+    if (view === "cv") renderCV();
+    if (view === "expenses") renderExpenses();
+    if (view === "habits") renderHabits();
+    if (view === "reminders") renderReminders();
+    if (view === "calendar") renderCalendar();
+    if (view === "focus") renderSessions();
+}
+
+$$(".nav-btn").forEach(b => b.addEventListener("click", () => go(b.dataset.view)));
+document.addEventListener("click", e => {
+    const t = e.target.closest("[data-go]");
+    if (t) go(t.dataset.go);
+});
+window.addEventListener("hashchange", () => go(location.hash.slice(1)));
+
+/* ============ Theme ============ */
+function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    $('meta[name="theme-color"]').setAttribute("content", t === "light" ? "#f5f4fb" : "#0b0b12");
+    store.set("nexoraTheme", t);
+}
+$("#themeDark").addEventListener("click", () => applyTheme("dark"));
+$("#themeLight").addEventListener("click", () => applyTheme("light"));
+applyTheme(store.get("nexoraTheme", "dark") === "light" ? "light" : "dark");
+
+/* ============ Dashboard ============ */
+function renderDashHabits() {
+    const t = dayKey(new Date());
+    const box = $("#dashHabits");
+    const done = habits.filter(x => x.days.includes(t)).length;
+    $("#dashHabitText").textContent = habits.length ? done + " of " + habits.length + " done" : "";
+    box.replaceChildren(...(habits.length
+        ? habits.map(hb => h("button", {
+            class: "chip" + (hb.days.includes(t) ? " active" : ""), type: "button", "aria-pressed": hb.days.includes(t) ? "true" : "false",
+            onclick: () => {
+                if (hb.days.includes(t)) hb.days = hb.days.filter(x => x !== t);
+                else hb.days = hb.days.concat(t).sort();
+                saveHabits();
+                renderDashboard();
+                renderHabits();
+                if (habits.every(x => x.days.includes(t))) toast("All habits done today 🎉");
+            }
+        }, hb.icon + " " + hb.name))
+        : [h("span", { text: "No habits yet. " }), h("button", { class: "btn small", type: "button", "data-go": "habits", text: "Add a habit" })]));
+}
+
+function renderDashboard() {
+    const p = getProfile();
+    const hr = new Date().getHours();
+    const part = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
+    const first = (p.name || "").trim().split(/\s+/)[0];
+    $("#greet").textContent = part + (first ? ", " + first : "") + " 👋";
+
+    const pending = tasks.filter(t => !t.done).length;
+    const done = tasks.filter(t => t.done).length;
+    const sess = getSessions()[todayStr()] || 0;
+
+    $("#heroSub").textContent = pending === 0
+        ? "You have no pending tasks. Add one, or enjoy the calm!"
+        : "You have " + pending + " pending task" + (pending === 1 ? "" : "s") + ". Let's get them done.";
+
+    const stats = [
+        ["📌", pending, "Pending tasks"],
+        ["✅", done, "Completed"],
+        ["📝", notes.length, "Notes saved"],
+        ["⏰", upcomingCount(), "Upcoming reminders"],
+        ["✨", habitsToday(), "Habits done today"],
+        ["💸", money(monthSpent()), "Spent this month"],
+        ["🔥", sess, "Focus sessions today"]
+    ];
+    const box = $("#stats");
+    box.replaceChildren(...stats.map(s =>
+        h("div", { class: "stat" },
+            h("div", { class: "ico", text: s[0] }),
+            h("div", { class: "num", text: s[1] }),
+            h("div", { class: "lbl", text: s[2] }))
+    ));
+
+    renderWeek();
+
+    const up = $("#upNext");
+    const nextTasks = sortTasks(tasks.filter(t => !t.done)).slice(0, 3);
+    const nextRems = reminders.filter(r => !r.fired).sort((x, y) => remTime(x) - remTime(y)).slice(0, 2);
+    const rows = nextTasks.map(t => h("li", {},
+        h("span", { text: "📌 " + t.text, style: "overflow-wrap:anywhere" }),
+        h("span", { class: "badge " + (t.priority || "medium"), text: t.due ? fmtDate(t.due) : (t.priority || "medium") })))
+        .concat(nextRems.map(r => h("li", {},
+            h("span", { text: "⏰ " + r.text, style: "overflow-wrap:anywhere" }),
+            h("span", { class: "badge", text: fmtRem(r) }))));
+    up.replaceChildren(...(rows.length ? rows : [h("li", {}, h("span", { text: "Nothing pending right now 🎉" }))]));
+
+    renderDashHabits();
+
+    const pct = profileCompleteness();
+    $("#profileTip").textContent = pct < 100
+        ? "Tip: your profile is " + pct + "% complete. Fill it in to save time on forms and messages."
+        : "Your profile is complete. Nice work!";
+}
+
+/* ============ Smart Profile ============ */
+function profileCompleteness() {
+    const p = getProfile();
+    const filled = FIELDS.filter(f => String(p[f.id] || "").trim()).length;
+    return Math.round((filled / FIELDS.length) * 100);
+}
+
+function renderProfileMeter() {
+    const pct = profileCompleteness();
+    $("#meterBar").style.width = pct + "%";
+    $("#meterText").textContent = "Profile " + pct + "% complete";
+}
+
+function buildProfileForm() {
+    const p = getProfile();
+    const box = $("#profileFields");
+    box.replaceChildren(...FIELDS.map(f =>
+        h("div", {},
+            h("label", { for: "pf-" + f.id, text: f.label + (f.req ? "" : " (optional)") }),
+            h("div", { class: "inline" },
+                h("input", {
+                    id: "pf-" + f.id, type: f.type, placeholder: f.ph || "",
+                    maxlength: f.type === "date" ? null : "150",
+                    required: f.req ? true : null, value: p[f.id] || "", autocomplete: "off"
+                }),
+                h("button", {
+                    type: "button", class: "icon-btn", title: "Copy " + f.label,
+                    "aria-label": "Copy " + f.label, text: "⧉",
+                    onclick: () => {
+                        const v = $("#pf-" + f.id).value.trim();
+                        v ? copyText(v) : toast("Nothing to copy yet");
+                    }
+                })))
+    ));
+}
+
+function readProfileForm() {
+    const p = {};
+    FIELDS.forEach(f => { p[f.id] = $("#pf-" + f.id).value.trim(); });
+    return p;
+}
+
+$("#profileForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const p = readProfileForm();
+    if (!p.name || !p.email) { toast("Please enter your name and email"); return; }
+    store.set("nexoraProfile", p);
+    renderProfileMeter();
+    toast("Profile saved ✔");
+});
+
+$("#copyAll").addEventListener("click", () => {
+    const p = readProfileForm();
+    const lines = FIELDS.filter(f => p[f.id]).map(f => f.label + ": " + (f.type === "date" ? fmtDate(p[f.id]) : p[f.id]));
+    lines.length ? copyText(lines.join("\n")) : toast("Fill in your details first");
+});
+
+$("#clearProfile").addEventListener("click", () => {
+    if (!confirm("Clear your saved profile?")) return;
+    localStorage.removeItem("nexoraProfile");
+    buildProfileForm();
+    renderProfileMeter();
+    toast("Profile cleared");
+});
+
+const DEMO = ["name", "email", "phone", "address"];
+
+function buildDemo() {
+    $("#demoFields").replaceChildren(...DEMO.map(id => {
+        const f = FIELDS.find(x => x.id === id);
+        return h("div", {},
+            h("label", { for: "demo-" + id, text: f.label }),
+            h("input", { id: "demo-" + id, type: f.type, placeholder: "Autofilled " + f.label.toLowerCase() }));
+    }));
+}
+
+$("#autofillBtn").addEventListener("click", () => {
+    const p = getProfile();
+    if (!p.name && !p.email) { toast("Save your profile first"); return; }
+    DEMO.forEach(id => {
+        const el = $("#demo-" + id);
+        el.value = p[id] || "";
+        el.classList.remove("filled");
+        void el.offsetWidth;
+        el.classList.add("filled");
+    });
+    toast("Autofill completed ✔");
+});
+
+$("#demoReset").addEventListener("click", buildDemo);
+
+/* ============ Tasks ============ */
+const RANK = { high: 0, medium: 1, low: 2 };
+let taskFilter = "all";
+
+function saveTasks() { store.set("nexoraTasks", tasks); }
+
+function sortTasks(list) {
+    return list.slice().sort((a, b) => {
+        if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+        const ad = a.due || "9999-99-99", bd = b.due || "9999-99-99";
+        if (ad !== bd) return ad < bd ? -1 : 1;
+        return (RANK[a.priority] ?? 1) - (RANK[b.priority] ?? 1);
+    });
+}
+
+function renderTasks() {
+    const q = $("#taskSearch").value.trim().toLowerCase();
+    let items = tasks.slice();
+    if (taskFilter === "active") items = items.filter(t => !t.done);
+    if (taskFilter === "done") items = items.filter(t => t.done);
+    if (q) items = items.filter(t => t.text.toLowerCase().includes(q));
+    items = sortTasks(items);
+
+    const list = $("#taskList");
+    if (!items.length) {
+        list.replaceChildren(h("li", { class: "empty" },
+            h("span", { class: "big", text: tasks.length ? "🔍" : "🌱" }),
+            tasks.length ? "No tasks match this view." : "No tasks yet. Add your first one above."));
+    } else {
+        const today = todayStr();
+        list.replaceChildren(...items.map(t => {
+            const overdue = !t.done && t.due && t.due < today;
+            const meta = h("div", { class: "t-meta" },
+                h("span", { class: "badge " + (t.priority || "medium"), text: t.priority || "medium" }),
+                t.due ? h("span", { class: "badge" + (overdue ? " overdue" : ""), text: (overdue ? "Overdue · " : "Due ") + fmtDate(t.due) }) : null,
+                t.repeat ? h("span", { class: "badge", text: "🔁 " + ({ daily: "Daily", weekly: "Weekly", monthly: "Monthly" })[t.repeat] }) : null);
+            return h("li", { class: "task" + (t.done ? " done" : "") },
+                h("input", {
+                    type: "checkbox", checked: !!t.done, "aria-label": "Mark done",
+                    onchange: e => completeTask(t, e.target.checked)
+                }),
+                h("div", { class: "t-main" }, h("div", { class: "t-text", text: t.text }), meta),
+                h("button", {
+                    class: "btn small", type: "button", text: "Edit",
+                    onclick: () => {
+                        editingTask = t.id;
+                        $("#taskInput").value = t.text;
+                        $("#taskPriority").value = t.priority || "medium";
+                        $("#taskDue").value = t.due || "";
+                        $("#taskRepeat").value = t.repeat || "";
+                        $("#taskSave").textContent = "Save";
+                        $("#taskCancel").hidden = false;
+                        go("tasks");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        $("#taskInput").focus();
+                    }
+                }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Remove",
+                    onclick: () => { tasks = tasks.filter(x => x.id !== t.id); saveTasks(); renderTasks(); }
+                }));
+        }));
+    }
+
+    const done = tasks.filter(t => t.done).length;
+    const total = tasks.length;
+    $("#taskBar").style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+    $("#taskCount").textContent = total
+        ? done + " of " + total + " tasks completed"
+        : "Add a task to start tracking progress";
+}
+
+$("#taskForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const text = $("#taskInput").value.trim();
+    if (!text) return;
+    const repeat = ["daily", "weekly", "monthly"].includes($("#taskRepeat").value) ? $("#taskRepeat").value : "";
+    const due = $("#taskDue").value || (repeat ? todayStr() : "");
+    const pr = RANK[$("#taskPriority").value] !== undefined ? $("#taskPriority").value : "medium";
+    const cur = editingTask && tasks.find(x => x.id === editingTask);
+    if (cur) {
+        cur.text = text.slice(0, 200); cur.priority = pr; cur.due = due; cur.repeat = repeat;
+        toast("Task updated ✔");
+    } else {
+        tasks.push({ id: uid(), text: text.slice(0, 200), done: false, priority: pr, due, repeat, spawned: false });
+        toast("Task added");
+    }
+    saveTasks();
+    resetTaskForm();
+    renderTasks();
+});
+
+let editingTask = null;
+function resetTaskForm() {
+    editingTask = null;
+    $("#taskInput").value = "";
+    $("#taskDue").value = "";
+    $("#taskRepeat").value = "";
+    $("#taskPriority").value = "medium";
+    $("#taskSave").textContent = "Add";
+    $("#taskCancel").hidden = true;
+}
+$("#taskCancel").addEventListener("click", resetTaskForm);
+
+function addToDate(str, repeat) {
+    const [y, m, d] = str.split("-").map(Number);
+    let dt;
+    if (repeat === "monthly") {
+        const last = new Date(y, m + 1, 0).getDate();
+        dt = new Date(y, m, Math.min(d, last));
+    } else {
+        dt = new Date(y, m - 1, d + (repeat === "weekly" ? 7 : 1));
+    }
+    return dayKey(dt);
+}
+
+function completeTask(t, done) {
+    t.done = done;
+    if (done && t.repeat && !t.spawned) {
+        const today = todayStr();
+        const base = t.due && t.due >= today ? t.due : today;
+        const next = addToDate(base, t.repeat);
+        tasks.push({ id: uid(), text: t.text, done: false, priority: t.priority, due: next, repeat: t.repeat, spawned: false });
+        t.spawned = true;
+        toast("Next one set for " + fmtDate(next) + " 🔁");
+    }
+    saveTasks();
+    renderTasks();
+}
+
+$("#clearDone").addEventListener("click", () => {
+    if (!tasks.some(t => t.done)) { toast("No completed tasks"); return; }
+    tasks = tasks.filter(t => !t.done);
+    saveTasks();
+    renderTasks();
+});
+
+$("#taskFilters").addEventListener("click", e => {
+    const b = e.target.closest("[data-filter]");
+    if (!b) return;
+    taskFilter = b.dataset.filter;
+    $$("#taskFilters .chip").forEach(c => c.classList.toggle("active", c === b));
+    renderTasks();
+});
+
+$("#taskSearch").addEventListener("input", renderTasks);
+
+/* Older tasks (saved before priorities existed) get an id so they can be edited */
+tasks.forEach(t => { if (t.id == null) t.id = uid(); });
+
+/* ============ Notes ============ */
+let editingNote = null;
+
+function cleanTags(v) {
+    const arr = Array.isArray(v) ? v : String(v || "").split(",");
+    return Array.from(new Set(arr.map(x => String(x).trim().replace(/^#/, "").toLowerCase().slice(0, 20)).filter(Boolean))).slice(0, 5);
+}
+
+function cleanNotes(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 1000).filter(n => n && typeof n === "object").map(n => ({
+        id: String(n.id || uid()), title: String(n.title || "").slice(0, 80),
+        body: String(n.body || "").slice(0, 4000), date: Number(n.date) || Date.now(),
+        pinned: !!n.pinned,
+        color: ["purple", "blue", "green", "amber", "red"].includes(n.color) ? n.color : "",
+        tags: cleanTags(n.tags)
+    }));
+}
+
+function saveNotes() { store.set("nexoraNotes", notes); }
+
+function renderNotes() {
+    const grid = $("#notesGrid");
+    if (!notes.length) {
+        grid.replaceChildren(h("div", { class: "card empty", style: "grid-column:1/-1" },
+            h("span", { class: "big", text: "📝" }), "No notes yet. Write your first note above."));
+        return;
+    }
+    const q = $("#noteSearch").value.trim().toLowerCase();
+    let list = notes.slice().reverse();
+    if (q) {
+        list = list.filter(n => q.startsWith("#")
+            ? (n.tags || []).includes(q.slice(1))
+            : (n.title || "").toLowerCase().includes(q) || (n.body || "").toLowerCase().includes(q) || (n.tags || []).some(t => t.includes(q)));
+    }
+    list.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    if (!list.length) {
+        grid.replaceChildren(h("div", { class: "card empty", style: "grid-column:1/-1" },
+            h("span", { class: "big", text: "🔍" }), "No notes match your search."));
+        return;
+    }
+    grid.replaceChildren(...list.map(n =>
+        h("div", { class: "note" + (n.color ? " c-" + n.color : "") + (n.pinned ? " pinned" : "") },
+            h("h3", { text: (n.pinned ? "📌 " : "") + (n.title || "Untitled") }),
+            h("div", { class: "body", text: n.body || "" }),
+            (n.tags && n.tags.length) ? h("div", { class: "tags" }, ...n.tags.map(t =>
+                h("button", { class: "tag", type: "button", text: "#" + t, onclick: () => { $("#noteSearch").value = "#" + t; renderNotes(); } }))) : null,
+            h("small", { text: n.date ? new Date(n.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "" }),
+            h("div", { class: "actions" },
+                h("button", { class: "btn small", type: "button", text: n.pinned ? "Unpin" : "Pin", onclick: () => { n.pinned = !n.pinned; saveNotes(); renderNotes(); } }),
+                h("button", { class: "btn small", type: "button", text: "Copy", onclick: () => copyText((n.title ? n.title + "\n\n" : "") + (n.body || "")) }),
+                h("button", {
+                    class: "btn small", type: "button", text: "Edit",
+                    onclick: () => {
+                        editingNote = n.id;
+                        $("#noteTitle").value = n.title || "";
+                        $("#noteBody").value = n.body || "";
+                        $("#noteColor").value = n.color || "";
+                        $("#noteTags").value = (n.tags || []).join(", ");
+                        $("#notePin").checked = !!n.pinned;
+                        $("#noteFormTitle").textContent = "Edit note";
+                        $("#noteCancel").hidden = false;
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Delete",
+                    onclick: () => {
+                        if (!confirm("Delete this note?")) return;
+                        notes = notes.filter(x => x.id !== n.id);
+                        saveNotes();
+                        renderNotes();
+                    }
+                })))
+    ));
+}
+
+function resetNoteForm() {
+    editingNote = null;
+    $("#noteTitle").value = "";
+    $("#noteBody").value = "";
+    $("#noteColor").value = "";
+    $("#noteTags").value = "";
+    $("#notePin").checked = false;
+    $("#noteFormTitle").textContent = "New note";
+    $("#noteCancel").hidden = true;
+}
+
+$("#noteForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("#noteTitle").value.trim();
+    const body = $("#noteBody").value.trim();
+    if (!title && !body) { toast("Write something first"); return; }
+    const noteExtra = {
+        color: ["purple", "blue", "green", "amber", "red"].includes($("#noteColor").value) ? $("#noteColor").value : "",
+        tags: cleanTags($("#noteTags").value), pinned: $("#notePin").checked
+    };
+    if (editingNote) {
+        const n = notes.find(x => x.id === editingNote);
+        if (n) { n.title = title; n.body = body; n.date = Date.now(); n.color = noteExtra.color; n.tags = noteExtra.tags; n.pinned = noteExtra.pinned; }
+    } else {
+        notes.push({ id: uid(), title, body, date: Date.now(), color: noteExtra.color, tags: noteExtra.tags, pinned: noteExtra.pinned });
+    }
+    saveNotes();
+    resetNoteForm();
+    renderNotes();
+    toast("Note saved ✔");
+});
+
+$("#noteCancel").addEventListener("click", resetNoteForm);
+$("#noteSearch").addEventListener("input", renderNotes);
+notes.forEach(n => { if (n.id == null) n.id = uid(); });
+
+/* ============ Message Writer ============ */
+function sign(p) {
+    return ["Sincerely,", p.name || "[Your name]", p.email, p.phone].filter(Boolean).join("\n");
+}
+
+const TEMPLATES = {
+    leave: {
+        label: "Leave application",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "The Principal" },
+            { id: "reason", label: "Reason", ph: "a family function" },
+            { id: "from", label: "From date", type: "date" },
+            { id: "until", label: "To date", type: "date" }
+        ],
+        build: (p, v) => ({
+            subject: "Application for leave",
+            body: "Dear " + (v.to || "Sir/Madam") + ",\n\nI am writing to request leave from " + fmtDate(v.from) + " to " + fmtDate(v.until) +
+                " due to " + (v.reason || "personal reasons") + ". I will make sure that any missed work is completed on my return.\n\nI would be grateful if you could kindly approve my request.\n\n" + sign(p)
+        })
+    },
+    job: {
+        label: "Job application",
+        fields: [
+            { id: "to", label: "Hiring manager", ph: "Hiring Manager" },
+            { id: "role", label: "Position", ph: "Junior Web Developer" },
+            { id: "company", label: "Company", ph: "Company name" },
+            { id: "skills", label: "Key skills", ph: "HTML, CSS, JavaScript" }
+        ],
+        build: (p, v) => ({
+            subject: "Application for " + (v.role || "the open position"),
+            body: "Dear " + (v.to || "Hiring Manager") + ",\n\nI am excited to apply for the " + (v.role || "[position]") + " role at " + (v.company || "[company]") + "." +
+                (p.education ? " I hold a background in " + p.education + "," : "") +
+                " and I bring skills in " + (v.skills || "[your key skills]") + ".\n\nI am a quick learner who enjoys building useful things, and I would love the chance to contribute to your team. My details are below, and I would be happy to share more at your convenience.\n\nThank you for your time and consideration.\n\n" + sign(p) +
+                (p.linkedin ? "\n" + p.linkedin : "")
+        })
+    },
+    meeting: {
+        label: "Meeting request",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "Dear Sir/Madam" },
+            { id: "topic", label: "Topic", ph: "project discussion" },
+            { id: "date", label: "Preferred date", type: "date" }
+        ],
+        build: (p, v) => ({
+            subject: "Meeting request: " + (v.topic || "discussion"),
+            body: "Dear " + (v.to || "Sir/Madam") + ",\n\nI would like to request a short meeting to discuss " + (v.topic || "[topic]") + ". I am available on " + fmtDate(v.date) +
+                ", and I am happy to adjust to a time that suits you.\n\nPlease let me know what works best for you.\n\n" + sign(p)
+        })
+    },
+    complaint: {
+        label: "Polite complaint",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "Customer Support" },
+            { id: "issue", label: "What went wrong?", ph: "I received a damaged item" },
+            { id: "ask", label: "What do you want?", ph: "a replacement or refund" }
+        ],
+        build: (p, v) => ({
+            subject: "Complaint regarding " + (v.issue || "my recent experience"),
+            body: "Dear " + (v.to || "Sir/Madam") + ",\n\nI am writing to bring a concern to your attention: " + (v.issue || "[describe the issue]") +
+                ". I believe this can be resolved quickly, and I kindly request " + (v.ask || "[your request]") + ".\n\nI would appreciate your help and a reply at your earliest convenience.\n\n" + sign(p)
+        })
+    },
+    thanks: {
+        label: "Thank-you note",
+        fields: [
+            { id: "to", label: "Addressed to", ph: "Dear Ali" },
+            { id: "for", label: "Thank them for", ph: "your guidance and support" }
+        ],
+        build: (p, v) => ({
+            subject: "Thank you",
+            body: (v.to || "Hello") + ",\n\nThank you so much for " + (v.for || "[what they did]") + ". It truly meant a lot to me, and I really appreciate the time and effort you gave.\n\nWith gratitude,\n" + (p.name || "[Your name]")
+        })
+    }
+};
+
+function buildWriter() {
+    const sel = $("#tplSelect");
+    sel.replaceChildren(...Object.entries(TEMPLATES).map(([k, t]) => h("option", { value: k, text: t.label })));
+    buildWriterFields();
+}
+
+function buildWriterFields() {
+    const t = TEMPLATES[$("#tplSelect").value];
+    $("#tplFields").replaceChildren(...t.fields.map(f =>
+        h("div", {},
+            h("label", { for: "wf-" + f.id, text: f.label }),
+            h("input", { id: "wf-" + f.id, type: f.type || "text", placeholder: f.ph || "", maxlength: "200", oninput: generateMessage }))
+    ));
+    generateMessage();
+}
+
+let writerSubject = "";
+
+function generateMessage() {
+    const t = TEMPLATES[$("#tplSelect").value];
+    if (!t) return;
+    const v = {};
+    t.fields.forEach(f => { const el = $("#wf-" + f.id); v[f.id] = el ? el.value.trim() : ""; });
+    const p = getProfile();
+    const out = t.build(p, v);
+    writerSubject = out.subject;
+    $("#writerOut").value = "Subject: " + out.subject + "\n\n" + out.body;
+    $("#writerHint").textContent = p.name
+        ? "Using your saved profile details."
+        : "Tip: save your Smart Profile to add your name and contact details automatically.";
+}
+
+$("#tplSelect").addEventListener("change", buildWriterFields);
+$("#writerCopy").addEventListener("click", () => copyText($("#writerOut").value));
+$("#writerMail").addEventListener("click", () => {
+    const text = $("#writerOut").value.replace(/^Subject:.*\n\n?/, "");
+    location.href = "mailto:?subject=" + encodeURIComponent(writerSubject) + "&body=" + encodeURIComponent(text);
+});
+
+/* ============ Focus Timer ============ */
+const MODES = { focus: 25 * 60, short: 5 * 60, long: 15 * 60 };
+const CIRC = 565.49;
+let mode = "focus", remaining = MODES.focus, running = false, endAt = 0, tick = null;
+
+function fmtTime(s) {
+    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+
+function renderTimer() {
+    $("#timeText").textContent = fmtTime(remaining);
+    $("#ringFg").style.strokeDashoffset = CIRC * (1 - remaining / MODES[mode]);
+    $("#timerStart").textContent = running ? "Pause" : "Start";
+    document.title = running ? fmtTime(remaining) + " · Nexora" : "Nexora | Smart Digital Workspace";
+}
+
+function renderSessions() {
+    const sess = getSessions();
+    const num = k => { const n = Number(sess[k]); return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0; };
+    $("#sessionsToday").textContent = num(todayStr());
+
+    const now = new Date();
+    const days = [];
+    for (let i = 6; i >= 0; i--) days.push(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+    const vals = days.map(d => num(dayKey(d)));
+    const week = vals.reduce((a, v) => a + v, 0);
+    let streak = 0;
+    const cur = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (!num(dayKey(cur))) cur.setDate(cur.getDate() - 1);
+    while (num(dayKey(cur)) && streak < 4000) { streak++; cur.setDate(cur.getDate() - 1); }
+
+    const card = (ico, val, label) => h("div", { class: "stat" },
+        h("div", { class: "ico", text: ico }), h("div", { class: "num", text: String(val) }), h("div", { class: "lbl", text: label }));
+    $("#focusStats").replaceChildren(
+        card("🔥", streak, streak === 1 ? "day streak" : "day streak"),
+        card("🎯", week, "sessions this week"),
+        card("⏱️", week * 25, "minutes focused"));
+
+    const max = Math.max(...vals, 0);
+    $("#focusBars").replaceChildren(...days.map((d, i) => h("div", { class: "bar-col" + (i === 6 ? " today" : ""), title: d.toDateString() + ": " + vals[i] },
+        h("span", { class: "val", text: vals[i] ? String(vals[i]) : "" }),
+        h("div", { class: "col " + (vals[i] ? "" : "zero"), style: "height:" + (max ? Math.max(4, Math.round(vals[i] / max * 84)) : 4) + "px" }),
+        h("span", { class: "lbl", text: d.toLocaleDateString("en-GB", { weekday: "short" }) }))));
+}
+
+function beep() {
+    try {
+        const a = new (window.AudioContext || window.webkitAudioContext)();
+        const o = a.createOscillator(), g = a.createGain();
+        o.connect(g); g.connect(a.destination);
+        o.frequency.value = 880; g.gain.value = 0.08;
+        o.start();
+        setTimeout(() => { o.stop(); a.close(); }, 450);
+    } catch { /* sound is optional */ }
+}
+
+function stopTimer() { running = false; clearInterval(tick); tick = null; }
+
+function finishTimer() {
+    stopTimer();
+    remaining = MODES[mode];
+    if (mode === "focus") {
+        const s = getSessions();
+        const k = todayStr();
+        s[k] = (s[k] || 0) + 1;
+        store.set("nexoraSessions", s);
+        renderSessions();
+        toast("Great focus! Time for a break 🎉");
+    } else {
+        toast("Break over. Ready to focus?");
+    }
+    beep();
+    renderTimer();
+}
+
+$("#timerStart").addEventListener("click", () => {
+    if (running) { stopTimer(); renderTimer(); return; }
+    running = true;
+    endAt = Date.now() + remaining * 1000;
+    tick = setInterval(() => {
+        remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+        renderTimer();
+        if (remaining <= 0) finishTimer();
+    }, 250);
+    renderTimer();
+});
+
+$("#timerReset").addEventListener("click", () => { stopTimer(); remaining = MODES[mode]; renderTimer(); });
+
+$("#modes").addEventListener("click", e => {
+    const b = e.target.closest("[data-mode]");
+    if (!b) return;
+    stopTimer();
+    mode = b.dataset.mode;
+    remaining = MODES[mode];
+    $$("#modes .chip").forEach(c => c.classList.toggle("active", c === b));
+    renderTimer();
+});
+
+/* ============ Settings: backup / restore ============ */
+function snapshot() {
+    return {
+        app: "nexora", version: 1, exported: new Date().toISOString(),
+        profile: getProfile(), tasks, notes, cv, expenses, habits, budget, reminders, currency, sessions: getSessions(),
+        theme: store.get("nexoraTheme", "dark")
+    };
+}
+
+function applyData(d, withTheme) {
+    const prof = d.profile && typeof d.profile === "object" && !Array.isArray(d.profile) ? d.profile : {};
+    const cleanProfile = {};
+    FIELDS.forEach(f => { cleanProfile[f.id] = String(prof[f.id] || "").slice(0, 150); });
+    tasks = (Array.isArray(d.tasks) ? d.tasks : []).filter(t => t && typeof t.text === "string").map(t => ({
+        id: String(t.id || uid()), text: t.text.slice(0, 200), done: !!t.done,
+        priority: RANK[t.priority] !== undefined ? t.priority : "medium",
+        due: /^\d{4}-\d{2}-\d{2}$/.test(t.due || "") ? t.due : "",
+        repeat: ["daily", "weekly", "monthly"].includes(t.repeat) ? t.repeat : "", spawned: !!t.spawned
+    }));
+    notes = cleanNotes(d.notes);
+    cv = cleanCV(d.cv);
+    store.set("nexoraCV", cv);
+    expenses = cleanExpenses(d.expenses);
+    store.set("nexoraExpenses", expenses);
+    habits = cleanHabits(d.habits);
+    store.set("nexoraHabits", habits);
+    budget = cleanBudget(d.budget);
+    store.set("nexoraBudget", budget);
+    reminders = cleanReminders(d.reminders);
+    store.set("nexoraReminders", reminders);
+    currency = cleanCurrency(d.currency);
+    store.set("nexoraCurrency", currency);
+    $("#expAmountLabel").textContent = "Amount (" + currency + ")";
+    $("#currencySel").value = currency;
+    store.set("nexoraProfile", cleanProfile);
+    store.set("nexoraTasks", tasks);
+    store.set("nexoraNotes", notes);
+    store.set("nexoraSessions", d.sessions && typeof d.sessions === "object" && !Array.isArray(d.sessions) ? d.sessions : {});
+    if (withTheme) applyTheme(d.theme === "light" ? "light" : "dark");
+    refreshAll();
+}
+
+$("#exportBtn").addEventListener("click", () => {
+    const data = snapshot();
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    const a = h("a", { href: url, download: "nexora-backup-" + todayStr() + ".json" });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("Backup downloaded");
+});
+
+$("#importBtn").addEventListener("click", () => $("#importFile").click());
+
+$("#importFile").addEventListener("change", e => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const d = JSON.parse(reader.result);
+            if (!d || d.app !== "nexora") throw new Error("not a Nexora backup");
+            if (!confirm("Restoring will replace your current Nexora data. Continue?")) return;
+            applyData(d, true);
+            toast("Backup restored ✔");
+        } catch {
+            toast("That file is not a valid Nexora backup");
+        }
+    };
+    reader.readAsText(file);
+});
+
+$("#resetBtn").addEventListener("click", () => {
+    if (!confirm(cloudUser
+        ? "Delete ALL your Nexora data from this device AND your online account? This cannot be undone."
+        : "Delete ALL your Nexora data from this browser? This cannot be undone.")) return;
+    ["nexoraProfile", "nexoraTasks", "nexoraNotes", "nexoraSessions", "nexoraCV", "nexoraExpenses", "nexoraHabits", "nexoraBudget", "nexoraReminders", "nexoraCurrency"].forEach(k => localStorage.removeItem(k));
+    tasks = []; notes = []; cv = cleanCV({}); expenses = []; habits = []; budget = 0; reminders = []; currency = "Rs";
+    markModified();
+    refreshAll();
+    toast("All data deleted");
+});
+
+/* ============ CV Builder ============ */
+const CV_COLORS = ["#7c3aed", "#2563eb", "#059669", "#dc2626", "#111827"];
+const CV_TEMPLATES = ["classic", "modern", "minimal"];
+
+const CV_LISTS = {
+    exp: { label: "Experience", f: ["Role / title", "Company", "Period (e.g. 2023 - 2024)", "What you did"] },
+    edu: { label: "Education", f: ["Degree / program", "Institute", "Period (e.g. 2021 - 2025)", "Details (optional)"] },
+    proj: { label: "Project", f: ["Project name", "Technologies / link", "Period (optional)", "What it does"] },
+    cert: { label: "Certificate", f: ["Certificate / course name", "Issued by", "Year", "Details (optional)"] }
+};
+
+function cleanCV(c) {
+    c = c && typeof c === "object" && !Array.isArray(c) ? c : {};
+    const list = k => (Array.isArray(c[k]) ? c[k] : []).slice(0, 12)
+        .filter(e => e && typeof e === "object")
+        .map(e => ({
+            a: String(e.a || "").slice(0, 120), b: String(e.b || "").slice(0, 120),
+            c: String(e.c || "").slice(0, 60), d: String(e.d || "").slice(0, 800)
+        }));
+    const sh = c.show && typeof c.show === "object" && !Array.isArray(c.show) ? c.show : {};
+    return {
+        title: String(c.title || "").slice(0, 100),
+        summary: String(c.summary || "").slice(0, 600),
+        skills: String(c.skills || "").slice(0, 400),
+        languages: String(c.languages || "").slice(0, 200),
+        exp: list("exp"), edu: list("edu"), proj: list("proj"), cert: list("cert"),
+        template: CV_TEMPLATES.includes(c.template) ? c.template : "classic",
+        accent: CV_COLORS.includes(c.accent) ? c.accent : CV_COLORS[0],
+        show: {
+            email: sh.email !== false, phone: sh.phone !== false, city: sh.city !== false,
+            address: sh.address === true, linkedin: sh.linkedin !== false
+        }
+    };
+}
+
+let cv = cleanCV(store.get("nexoraCV", {}));
+function saveCV() { store.set("nexoraCV", cv); }
+
+function buildCVForm() {
+    $("#cvTitle").value = cv.title;
+    $("#cvSummary").value = cv.summary;
+    $("#cvSkills").value = cv.skills;
+    $("#cvLanguages").value = cv.languages;
+    $("#cvTemplate").value = cv.template;
+    $("#cvAccent").value = cv.accent;
+    $$("[data-cvshow]").forEach(c => { c.checked = !!cv.show[c.dataset.cvshow]; });
+    Object.keys(CV_LISTS).forEach(buildCVList);
+    renderCV();
+}
+
+function buildCVList(key) {
+    const spec = CV_LISTS[key];
+    const box = $("#cvList-" + key);
+    const nodes = cv[key].map((entry, i) => {
+        const field = (name, ph, tag) => h(tag || "input", {
+            placeholder: ph, "aria-label": ph, maxlength: tag ? "800" : "120", value: entry[name],
+            oninput: ev => { entry[name] = ev.target.value; saveCV(); renderCV(); }
+        });
+        return h("div", { class: "cv-entry" },
+            h("div", { class: "cv-entry-head" },
+                h("small", { text: spec.label + " " + (i + 1) }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Remove",
+                    onclick: () => { cv[key].splice(i, 1); saveCV(); buildCVList(key); renderCV(); }
+                })),
+            field("a", spec.f[0]), field("b", spec.f[1]), field("c", spec.f[2]), field("d", spec.f[3], "textarea"));
+    });
+    box.replaceChildren(...(nodes.length ? nodes : [h("p", { text: "Nothing added yet." })]));
+}
+
+function cvEntries(list) {
+    return list.filter(e => e.a || e.b || e.c || e.d).map(e =>
+        h("div", { class: "cv-item" },
+            h("div", { class: "cv-row" },
+                h("strong", { text: e.a }),
+                e.c ? h("span", { class: "cv-period", text: e.c }) : null),
+            e.b ? h("div", { class: "cv-sub", text: e.b }) : null,
+            e.d ? h("div", { class: "cv-desc", text: e.d }) : null));
+}
+
+function cvSection(title, nodes) {
+    return nodes.length ? h("div", { class: "cv-sec" }, h("h2", { text: title }), ...nodes) : null;
+}
+
+function renderCV() {
+    const p = getProfile();
+    const sh = cv.show;
+    const place = [sh.address ? p.address : "", sh.city ? p.city : ""].filter(Boolean).join(", ");
+    const contact = [sh.email ? p.email : "", sh.phone ? p.phone : "", place, sh.linkedin ? p.linkedin : ""].filter(Boolean);
+    const skills = cv.skills.split(",").map(x => x.trim()).filter(Boolean).slice(0, 30);
+    const langs = cv.languages.split(",").map(x => x.trim()).filter(Boolean).slice(0, 10);
+    let edu = cvEntries(cv.edu);
+    if (!edu.length && p.education) edu = [h("div", { class: "cv-item" }, h("strong", { text: p.education }))];
+
+    const paper = h("div", { class: "paper paper--" + cv.template, style: "--cv:" + cv.accent },
+        h("div", { class: "cv-head" },
+            h("div", { class: "cv-name", text: p.name || "Your Name" }),
+            cv.title ? h("div", { class: "cv-title", text: cv.title }) : null,
+            contact.length ? h("div", { class: "cv-contact", text: contact.join("  •  ") }) : null),
+        cvSection("Summary", cv.summary ? [h("div", { class: "cv-desc", text: cv.summary })] : []),
+        cvSection("Skills", skills.length ? [h("div", { class: "cv-skills" }, ...skills.map(x => h("span", { class: "cv-skill", text: x })))] : []),
+        cvSection("Languages", langs.length ? [h("div", { class: "cv-desc", text: langs.join("  •  ") })] : []),
+        cvSection("Experience", cvEntries(cv.exp)),
+        cvSection("Education", edu),
+        cvSection("Projects", cvEntries(cv.proj)),
+        cvSection("Certificates", cvEntries(cv.cert)));
+
+    $("#cvPaper").replaceChildren(paper);
+    $("#cvHint").textContent = p.name ? "" : "Tip: save your Smart Profile first, so your name and contact details appear here.";
+}
+
+[["#cvTitle", "title"], ["#cvSummary", "summary"], ["#cvSkills", "skills"], ["#cvLanguages", "languages"]].forEach(([sel, key]) =>
+    $(sel).addEventListener("input", e => { cv[key] = e.target.value; saveCV(); renderCV(); }));
+
+$("#cvTemplate").addEventListener("change", e => {
+    cv.template = CV_TEMPLATES.includes(e.target.value) ? e.target.value : "classic";
+    saveCV(); renderCV();
+});
+
+$("#cvAccent").addEventListener("change", e => {
+    cv.accent = CV_COLORS.includes(e.target.value) ? e.target.value : CV_COLORS[0];
+    saveCV(); renderCV();
+});
+
+$$("[data-cvshow]").forEach(c => c.addEventListener("change", () => {
+    cv.show[c.dataset.cvshow] = c.checked;
+    saveCV(); renderCV();
+}));
+
+$$("[data-cvadd]").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.cvadd;
+    if (cv[k].length >= 12) { toast("You can add up to 12 entries"); return; }
+    cv[k].push({ a: "", b: "", c: "", d: "" });
+    saveCV(); buildCVList(k); renderCV();
+}));
+
+$("#cvPrint").addEventListener("click", () => {
+    const old = document.title;
+    document.title = (getProfile().name || "Nexora") + " - CV";
+    window.print();
+    document.title = old;
+});
+
+/* ============ Expense Tracker ============ */
+const EXP_CATS = {
+    expense: ["Food", "Transport", "Bills", "Shopping", "Education", "Health", "Fun", "Other"],
+    income: ["Pocket money", "Salary", "Gift", "Other"]
+};
+const EXP_ICONS = {
+    Food: "🍔", Transport: "🚌", Bills: "💡", Shopping: "🛍️", Education: "📚", Health: "💊",
+    Fun: "🎬", Other: "📦", "Pocket money": "👛", Salary: "💼", Gift: "🎁"
+};
+
+function cleanExpenses(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 5000).filter(e =>
+        e && typeof e === "object" &&
+        (e.type === "expense" || e.type === "income") &&
+        Number.isFinite(Number(e.amount)) && Number(e.amount) > 0 && Number(e.amount) < 1e10 &&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(e.date || ""))
+    ).map(e => ({
+        id: String(e.id || uid()), type: e.type, amount: Math.round(Number(e.amount) * 100) / 100,
+        cat: EXP_CATS[e.type].includes(e.cat) ? e.cat : "Other",
+        date: e.date, note: String(e.note || "").slice(0, 80)
+    }));
+}
+
+let expenses = cleanExpenses(store.get("nexoraExpenses", []));
+let expMonth = todayStr().slice(0, 7);
+
+function saveExpenses() { store.set("nexoraExpenses", expenses); }
+const CURRENCIES = [["Rs", "Pakistani Rupee (Rs)"], ["$", "US Dollar ($)"], ["€", "Euro (€)"], ["£", "British Pound (£)"], ["AED", "UAE Dirham (AED)"], ["SAR", "Saudi Riyal (SAR)"], ["₹", "Indian Rupee (₹)"]];
+const cleanCurrency = v => CURRENCIES.some(c => c[0] === v) ? v : "Rs";
+let currency = cleanCurrency(store.get("nexoraCurrency", "Rs"));
+const money = n => { const v = Number(n) || 0; return (v < 0 ? "-" : "") + currency + (/^[A-Za-z]+$/.test(currency) ? " " : "") + Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 2 }); };
+
+function applyCurrency() {
+    $("#expAmountLabel").textContent = "Amount (" + currency + ")";
+    $("#currencySel").value = currency;
+    renderExpenses();
+    renderDashboard();
+    renderCalendar();
+}
+
+$("#currencySel").replaceChildren(...CURRENCIES.map(([v, label]) => h("option", { value: v, text: label })));
+$("#currencySel").addEventListener("change", e => {
+    currency = cleanCurrency(e.target.value);
+    store.set("nexoraCurrency", currency);
+    applyCurrency();
+    toast("Currency updated ✔");
+});
+
+function monthSpent() {
+    const m = todayStr().slice(0, 7);
+    return expenses.filter(e => e.type === "expense" && e.date.slice(0, 7) === m).reduce((a, e) => a + e.amount, 0);
+}
+
+function fillExpCats() {
+    $("#expCat").replaceChildren(...EXP_CATS[$("#expType").value].map(c =>
+        h("option", { value: c, text: (EXP_ICONS[c] || "") + " " + c })));
+}
+
+function svgEl(tag, attrs) {
+    const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+    return e;
+}
+
+function renderDonut(rows, total, pal) {
+    const box = $("#expDonut");
+    if (!rows.length || !total) { box.replaceChildren(); return; }
+    const C = 2 * Math.PI * 46;
+    const svg = svgEl("svg", { viewBox: "0 0 120 120", role: "img", "aria-label": "Spending by category: " + rows.map(([c, v]) => c + " " + money(v)).join(", ") });
+    svg.append(svgEl("circle", { cx: 60, cy: 60, r: 46, fill: "none", stroke: "var(--card2)", "stroke-width": 16 }));
+    let offset = 0;
+    rows.forEach(([cat, v], i) => {
+        const len = v / total * C;
+        svg.append(svgEl("circle", {
+            cx: 60, cy: 60, r: 46, fill: "none", stroke: pal[i % pal.length], "stroke-width": 16,
+            "stroke-dasharray": Math.max(0, len - (rows.length > 1 ? 1.2 : 0)).toFixed(2) + " " + C.toFixed(2),
+            "stroke-dashoffset": (-offset).toFixed(2), transform: "rotate(-90 60 60)"
+        }));
+        offset += len;
+    });
+    const t1 = svgEl("text", { x: 60, y: 60, "text-anchor": "middle", class: "d-total" });
+    t1.textContent = money(total);
+    const t2 = svgEl("text", { x: 60, y: 72, "text-anchor": "middle", class: "d-lbl" });
+    t2.textContent = "spent";
+    svg.append(t1, t2);
+    box.replaceChildren(svg);
+}
+
+function renderExpenses() {
+    $("#expMonth").value = expMonth;
+    const items = expenses.filter(e => e.date.slice(0, 7) === expMonth)
+        .reverse()
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+    const inc = items.filter(e => e.type === "income").reduce((a, e) => a + e.amount, 0);
+    const out = items.filter(e => e.type === "expense").reduce((a, e) => a + e.amount, 0);
+    const bal = inc - out;
+
+    const card = (ico, label, val, color) => h("div", { class: "stat" },
+        h("div", { class: "ico", text: ico }),
+        h("div", { class: "num", text: money(val), style: color ? "color:" + color : null }),
+        h("div", { class: "lbl", text: label }));
+    $("#expStats").replaceChildren(
+        card("💰", "Income", inc, "var(--ok)"),
+        card("💸", "Spent", out, "var(--danger)"),
+        card("🧮", "Balance", bal, bal < 0 ? "var(--danger)" : null));
+
+    renderBudget(out);
+
+    const [cy, cm] = expMonth.split("-").map(Number);
+    const monthKey = (off) => dayKey(new Date(cy, cm - 1 + off, 1)).slice(0, 7);
+    const spentIn = k => expenses.filter(e => e.type === "expense" && e.date.slice(0, 7) === k).reduce((a, e) => a + e.amount, 0);
+    const prevSpent = spentIn(monthKey(-1));
+    $("#expCompare").textContent = !prevSpent
+        ? (out ? "No spending recorded last month to compare with." : "")
+        : out === prevSpent ? "Same as last month (" + money(prevSpent) + ")."
+        : money(Math.abs(out - prevSpent)) + (out > prevSpent ? " more" : " less") + " than last month (" + money(prevSpent) + ").";
+
+    const trendDays = [-5, -4, -3, -2, -1, 0].map(o => new Date(cy, cm - 1 + o, 1));
+    const trendVals = trendDays.map(d => spentIn(dayKey(d).slice(0, 7)));
+    const tmax = Math.max(...trendVals, 0);
+    $("#expTrend").replaceChildren(...trendDays.map((d, i) => h("div", { class: "bar-col" + (i === 5 ? " today" : ""), title: d.toLocaleDateString("en-GB", { month: "long", year: "numeric" }) + ": " + money(trendVals[i]) },
+        h("span", { class: "val", text: trendVals[i] ? (trendVals[i] >= 1000 ? Math.round(trendVals[i] / 100) / 10 + "k" : String(Math.round(trendVals[i]))) : "" }),
+        h("div", { class: "col " + (trendVals[i] ? "money" : "zero"), style: "height:" + (tmax ? Math.max(4, Math.round(trendVals[i] / tmax * 84)) : 4) + "px" }),
+        h("span", { class: "lbl", text: d.toLocaleDateString("en-GB", { month: "short" }) }))));
+
+    const byCat = {};
+    items.filter(e => e.type === "expense").forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+    const rows = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const PAL = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#14b8a6", "#94a3b8"];
+    renderDonut(rows, out, PAL);
+    $("#expBars").replaceChildren(...(rows.length
+        ? rows.map(([cat, v], i) => {
+            const pct = out ? Math.round(v / out * 100) : 0;
+            return h("div", { class: "bar-row" },
+                h("div", { class: "bar-top" },
+                    h("span", {}, h("span", { class: "dot", style: "background:" + PAL[i % PAL.length] }), (EXP_ICONS[cat] || "") + " " + cat),
+                    h("span", { text: money(v) + " · " + pct + "%" })),
+                h("div", { class: "meter", style: "margin:6px 0 0" }, h("div", { style: "width:" + pct + "%" })));
+        })
+        : [h("div", { class: "empty" }, h("span", { class: "big", text: "🌱" }), "No spending recorded for this month.")]));
+
+    $("#expList").replaceChildren(...(items.length
+        ? items.map(e => {
+            const isInc = e.type === "income";
+            return h("li", { class: "task" },
+                h("div", { class: "t-main" },
+                    h("div", { class: "t-text", text: (EXP_ICONS[e.cat] || "") + " " + (e.note || e.cat) }),
+                    h("div", { class: "t-meta" },
+                        h("span", { class: "badge", text: e.cat }),
+                        h("span", { class: "badge", text: fmtDate(e.date) }))),
+                h("strong", { text: (isInc ? "+" : "−") + money(e.amount), style: "white-space:nowrap;color:" + (isInc ? "var(--ok)" : "var(--danger)") }),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Delete",
+                    onclick: () => { expenses = expenses.filter(x => x.id !== e.id); saveExpenses(); renderExpenses(); toast("Deleted"); }
+                }));
+        })
+        : [h("li", { class: "empty" }, h("span", { class: "big", text: "💸" }), "Nothing here yet. Add your first entry above.")]));
+}
+
+$("#expType").addEventListener("change", fillExpCats);
+
+$("#expForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const amount = parseFloat($("#expAmount").value);
+    const date = $("#expDate").value;
+    const type = $("#expType").value === "income" ? "income" : "expense";
+    if (!Number.isFinite(amount) || amount <= 0 || amount >= 1e10) { toast("Enter a valid amount"); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { toast("Pick a date"); return; }
+    const cat = EXP_CATS[type].includes($("#expCat").value) ? $("#expCat").value : "Other";
+    expenses.push({
+        id: uid(), type, amount: Math.round(amount * 100) / 100, cat, date,
+        note: $("#expNote").value.trim().slice(0, 80)
+    });
+    saveExpenses();
+    expMonth = date.slice(0, 7);
+    $("#expAmount").value = "";
+    $("#expNote").value = "";
+    renderExpenses();
+    toast(type === "income" ? "Income added" : "Expense added");
+});
+
+$("#expMonth").addEventListener("change", e => {
+    if (/^\d{4}-\d{2}$/.test(e.target.value)) { expMonth = e.target.value; renderExpenses(); }
+});
+
+$("#expCsv").addEventListener("click", () => {
+    const items = expenses.filter(e => e.date.slice(0, 7) === expMonth).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    if (!items.length) { toast("Nothing to download for this month"); return; }
+    const q = v => {
+        let t = String(v);
+        if (/^[=+\-@\t\r]/.test(t)) t = "'" + t;
+        return '"' + t.replace(/"/g, '""') + '"';
+    };
+    const csv = ["Date,Type,Category,Note,Amount"]
+        .concat(items.map(e => [e.date, e.type, e.cat, q(e.note), e.amount].join(","))).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = h("a", { href: url, download: "nexora-expenses-" + expMonth + ".csv" });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("CSV downloaded");
+});
+
+$("#expDate").value = todayStr();
+
+/* ============ Budget ============ */
+function cleanBudget(v) {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 && n < 1e10 ? Math.round(n * 100) / 100 : 0;
+}
+
+let budget = cleanBudget(store.get("nexoraBudget", 0));
+
+function renderBudget(spent) {
+    const input = $("#budgetInput"), bar = $("#budgetBar"), txt = $("#budgetText");
+    if (document.activeElement !== input) input.value = budget || "";
+    if (!budget) {
+        bar.style.width = "0%";
+        txt.textContent = "Set a monthly budget to see how much you have left.";
+        return;
+    }
+    const pct = Math.min(100, Math.round(spent / budget * 100));
+    bar.style.width = pct + "%";
+    bar.style.background = spent > budget ? "var(--danger)" : spent >= budget * 0.8 ? "var(--warn)" : "";
+    txt.textContent = spent > budget
+        ? "Over budget by " + money(spent - budget) + " (" + money(spent) + " of " + money(budget) + ")"
+        : money(budget - spent) + " left (" + money(spent) + " of " + money(budget) + " spent)";
+}
+
+$("#budgetSave").addEventListener("click", () => {
+    const n = cleanBudget($("#budgetInput").value);
+    if (!n) { toast("Enter a valid budget"); return; }
+    budget = n;
+    store.set("nexoraBudget", budget);
+    renderExpenses();
+    toast("Budget saved ✔");
+});
+
+$("#budgetClear").addEventListener("click", () => {
+    budget = 0;
+    store.set("nexoraBudget", 0);
+    $("#budgetInput").value = "";
+    renderExpenses();
+    toast("Budget removed");
+});
+
+/* ============ Habit Tracker ============ */
+const HABIT_ICONS = ["💧", "📚", "🕌", "🏃", "😴", "🥗", "✍️", "💻", "⭐"];
+const dayKey = d => d.toLocaleDateString("en-CA");
+const dayNum = k => { const [y, m, d] = k.split("-").map(Number); return Math.round(Date.UTC(y, m - 1, d) / 86400000); };
+
+function cleanHabits(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 50)
+        .filter(x => x && typeof x === "object" && typeof x.name === "string" && x.name.trim())
+        .map(x => ({
+            id: String(x.id || uid()),
+            name: x.name.trim().slice(0, 40),
+            icon: HABIT_ICONS.includes(x.icon) ? x.icon : "⭐",
+            days: Array.from(new Set((Array.isArray(x.days) ? x.days : [])
+                .filter(d => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)))).sort().slice(-3700)
+        }));
+}
+
+let habits = cleanHabits(store.get("nexoraHabits", []));
+function saveHabits() { store.set("nexoraHabits", habits); }
+
+function habitStreak(days) {
+    const set = new Set(days);
+    const d = new Date();
+    d.setHours(12, 0, 0, 0);
+    if (!set.has(dayKey(d))) d.setDate(d.getDate() - 1);
+    let n = 0;
+    while (set.has(dayKey(d)) && n < 4000) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+}
+
+function habitBest(days) {
+    let best = 0, run = 0, prev = null;
+    days.slice().sort().forEach(k => {
+        const n = dayNum(k);
+        run = prev !== null && n === prev + 1 ? run + 1 : 1;
+        if (run > best) best = run;
+        prev = n;
+    });
+    return best;
+}
+
+function habitsToday() {
+    const t = dayKey(new Date());
+    return habits.filter(x => x.days.includes(t)).length + "/" + habits.length;
+}
+
+function renderHabits() {
+    const now = new Date();
+    const today = dayKey(now);
+    const doneToday = habits.filter(x => x.days.includes(today)).length;
+    $("#habitSummary").textContent = habits.length
+        ? "Today: " + doneToday + " of " + habits.length + " done" + (doneToday === habits.length ? " 🎉" : "")
+        : "Add your first habit to get started";
+    $("#habitBar").style.width = (habits.length ? Math.round(doneToday / habits.length * 100) : 0) + "%";
+
+    const week = [];
+    for (let i = 6; i >= 0; i--) week.push(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+
+    const cards = habits.map(hb => {
+        const set = new Set(hb.days);
+        const streak = habitStreak(hb.days);
+        const days = week.map((d, i) => {
+            const k = dayKey(d);
+            const on = set.has(k);
+            return h("button", {
+                type: "button", class: "day" + (on ? " on" : "") + (i === 6 ? " today" : ""),
+                "aria-pressed": on ? "true" : "false",
+                "aria-label": hb.name + ", " + d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+                onclick: () => {
+                    if (set.has(k)) hb.days = hb.days.filter(x => x !== k);
+                    else hb.days = hb.days.concat(k).sort();
+                    saveHabits();
+                    renderHabits();
+                    if (k === today && hb.days.includes(today) && habits.every(x => x.days.includes(today))) toast("All habits done today 🎉");
+                }
+            }, h("span", { text: d.toLocaleDateString("en-GB", { weekday: "short" }) }), h("b", { text: String(d.getDate()) }));
+        });
+        return h("div", { class: "card habit" },
+            h("div", { class: "habit-head" },
+                h("div", { class: "habit-title" }, h("span", { class: "habit-ico", text: hb.icon }), h("strong", { text: hb.name })),
+                h("button", {
+                    class: "btn small danger", type: "button", text: "Delete",
+                    onclick: () => {
+                        if (!confirm("Delete this habit and its history?")) return;
+                        habits = habits.filter(x => x.id !== hb.id);
+                        saveHabits();
+                        renderHabits();
+                    }
+                })),
+            h("div", { class: "habit-meta" },
+                h("span", { class: "badge", text: "🔥 " + streak + (streak === 1 ? " day streak" : " day streak") }),
+                h("span", { class: "badge", text: "Best " + habitBest(hb.days) }),
+                h("span", { class: "badge", text: hb.days.length + " total" })),
+            h("div", { class: "habit-week" }, ...days));
+    });
+
+    $("#habitList").replaceChildren(...(cards.length
+        ? cards
+        : [h("div", { class: "card empty" }, h("span", { class: "big", text: "🌱" }), "No habits yet. Add one above, then tap today's day to tick it off.")]));
+}
+
+$("#habitForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = $("#habitName").value.trim();
+    if (!name) return;
+    if (habits.length >= 50) { toast("You can track up to 50 habits"); return; }
+    const icon = HABIT_ICONS.includes($("#habitIcon").value) ? $("#habitIcon").value : "⭐";
+    habits.push({ id: uid(), name: name.slice(0, 40), icon, days: [] });
+    saveHabits();
+    $("#habitName").value = "";
+    renderHabits();
+    toast("Habit added");
+});
+
+/* ============ Reminders ============ */
+const REM_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+function cleanReminders(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 200)
+        .filter(x => x && typeof x === "object" && typeof x.text === "string" && x.text.trim() && REM_RE.test(String(x.at || "")))
+        .map(x => ({ id: String(x.id || uid()), text: x.text.trim().slice(0, 100), at: x.at, fired: !!x.fired }));
+}
+
+let reminders = cleanReminders(store.get("nexoraReminders", []));
+function saveReminders() { store.set("nexoraReminders", reminders); }
+const remTime = r => new Date(r.at).getTime();
+const fmtRem = r => new Date(r.at).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
+
+function upcomingCount() { return reminders.filter(r => !r.fired).length; }
+
+function notifSupported() { return typeof Notification !== "undefined"; }
+
+function renderPerm() {
+    const t = $("#remPermText"), b = $("#remPermBtn");
+    if (!notifSupported()) {
+        t.textContent = "This browser can't show notifications. You will still see a pop-up inside Nexora.";
+        b.hidden = true; return;
+    }
+    const st = Notification.permission;
+    b.hidden = st !== "default";
+    t.textContent = st === "granted" ? "On ✔ You will get a notification when a reminder is due (Nexora must be open or running in the background)."
+        : st === "denied" ? "Blocked in your browser settings. You will still see a pop-up inside Nexora while it is open."
+        : "Turn on notifications so reminders can alert you even when Nexora is in another tab.";
+}
+
+$("#remPermBtn").addEventListener("click", async () => {
+    try { await Notification.requestPermission(); } catch {}
+    renderPerm();
+});
+
+function renderReminders() {
+    renderPerm();
+    const now = Date.now();
+    const list = reminders.slice().sort((a, b) => (a.fired - b.fired) || remTime(a) - remTime(b));
+    $("#remList").replaceChildren(...(list.length ? list.map(r => {
+        const late = r.fired;
+        return h("li", { class: "task" + (late ? " rem-done" : "") },
+            h("span", { text: late ? "✅" : "⏰", style: "font-size:1.3rem" }),
+            h("div", { class: "t-main" },
+                h("div", { class: "t-text", text: r.text }),
+                h("div", { class: "t-meta" }, h("span", { class: "badge" + (!late && remTime(r) < now ? " overdue" : ""), text: fmtRem(r) }))),
+            h("button", {
+                class: "btn small danger", type: "button", text: "Remove",
+                onclick: () => { reminders = reminders.filter(x => x.id !== r.id); saveReminders(); renderReminders(); }
+            }));
+    }) : [h("li", { class: "empty" }, h("span", { class: "big", text: "⏰" }), "No reminders yet. Add one above.")]));
+}
+
+$("#remAt").addEventListener("focus", () => {
+    if (!$("#remAt").value) {
+        const d = new Date(Date.now() + 3600000);
+        d.setSeconds(0, 0);
+        $("#remAt").value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
+});
+
+$("#remForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const text = $("#remText").value.trim(), at = $("#remAt").value;
+    if (!text || !REM_RE.test(at)) return;
+    if (new Date(at).getTime() <= Date.now()) { toast("Pick a time in the future"); return; }
+    if (reminders.length >= 200) { toast("Too many reminders, remove some first"); return; }
+    reminders.push({ id: uid(), text: text.slice(0, 100), at, fired: false });
+    saveReminders();
+    $("#remText").value = ""; $("#remAt").value = "";
+    renderReminders();
+    toast("Reminder set ✔");
+    if (notifSupported() && Notification.permission === "default") {
+        try { await Notification.requestPermission(); } catch {}
+        renderPerm();
+    }
+});
+
+function showBanner(items) {
+    const b = $("#remBanner");
+    b.replaceChildren(
+        h("div", {}, h("strong", { text: "⏰ Reminder" }), ...items.map(t => h("div", { text: t }))),
+        h("button", { class: "btn small", type: "button", text: "OK", onclick: () => { b.hidden = true; } }));
+    b.hidden = false;
+}
+
+async function systemNotify(text) {
+    if (!notifSupported() || Notification.permission !== "granted") return;
+    try {
+        const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : null;
+        if (reg && reg.showNotification) await reg.showNotification("Nexora reminder", { body: text, icon: "icon-192.png", tag: "nexora-" + text.slice(0, 20) });
+        else new Notification("Nexora reminder", { body: text, icon: "icon-192.png" });
+    } catch {}
+}
+
+function checkReminders() {
+    const now = Date.now();
+    const due = reminders.filter(r => !r.fired && remTime(r) <= now);
+    if (!due.length) return;
+    due.forEach(r => { r.fired = true; systemNotify(r.text); });
+    saveReminders();
+    showBanner(due.map(r => r.text));
+    renderReminders();
+    renderDashboard();
+}
+
+/* ============ Weekly chart ============ */
+function renderWeek() {
+    const now = new Date();
+    const days = [];
+    for (let i = 6; i >= 0; i--) days.push(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+    const draw = (id, values, fmt, cls) => {
+        const max = Math.max(...values, 0);
+        $(id).replaceChildren(...days.map((d, i) => h("div", { class: "bar-col" + (i === 6 ? " today" : ""), title: d.toDateString() + ": " + fmt(values[i]) },
+            h("span", { class: "val", text: values[i] ? fmt(values[i]) : "" }),
+            h("div", { class: "col " + (values[i] ? cls : "zero"), style: "height:" + (max ? Math.max(4, Math.round(values[i] / max * 84)) : 4) + "px" }),
+            h("span", { class: "lbl", text: d.toLocaleDateString("en-GB", { weekday: "short" }) }))));
+    };
+    const keys = days.map(dayKey);
+    draw("#weekHabits", keys.map(k => habits.filter(x => x.days.includes(k)).length), v => String(v), "");
+    draw("#weekSpend", keys.map(k => expenses.filter(e => e.type === "expense" && e.date === k).reduce((a, e) => a + e.amount, 0)),
+        v => v >= 1000 ? Math.round(v / 100) / 10 + "k" : String(Math.round(v)), "money");
+}
+
+/* ============ Global search (Ctrl+K) ============ */
+const VIEW_ICONS = { dashboard: "🏠", profile: "👤", tasks: "✅", reminders: "⏰", calendar: "📅", habits: "🔥", expenses: "💰", notes: "📝", cv: "📄", writer: "✉️", focus: "⏱️", settings: "⚙️" };
+let searchSel = 0, searchList = [], searchReturn = null;
+
+function buildSearch(q) {
+    const ql = q.trim().toLowerCase();
+    const out = [];
+    const views = Object.entries(TITLES).map(([v, t]) => ({
+        icon: VIEW_ICONS[v] || "•", title: ql ? t : "Go to " + t, sub: "Page", run: () => go(v), match: !ql || t.toLowerCase().includes(ql) || v.includes(ql)
+    })).filter(x => x.match);
+    if (!ql) return views;
+    const has = (...xs) => xs.some(x => String(x || "").toLowerCase().includes(ql));
+    tasks.filter(t => has(t.text)).slice(0, 6).forEach(t => out.push({
+        icon: t.done ? "✅" : "📌", title: t.text, sub: "Task" + (t.due ? " · due " + fmtDate(t.due) : "") + (t.done ? " · done" : ""),
+        run: () => {
+            go("tasks");
+            taskFilter = "all";
+            $$("#taskFilters .chip").forEach(c => c.classList.toggle("active", c.dataset.filter === "all"));
+            $("#taskSearch").value = q.trim();
+            renderTasks();
+        }
+    }));
+    notes.filter(n => has(n.title, n.body, (n.tags || []).join(" "))).slice(0, 6).forEach(n => out.push({
+        icon: "📝", title: n.title || (n.body || "").slice(0, 60) || "Untitled", sub: "Note",
+        run: () => { go("notes"); $("#noteSearch").value = q.trim(); renderNotes(); }
+    }));
+    habits.filter(x => has(x.name)).slice(0, 4).forEach(x => out.push({ icon: x.icon, title: x.name, sub: "Habit", run: () => go("habits") }));
+    reminders.filter(r => has(r.text)).slice(0, 4).forEach(r => out.push({ icon: "⏰", title: r.text, sub: "Reminder · " + fmtRem(r), run: () => go("reminders") }));
+    expenses.filter(e => has(e.note, e.cat)).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5).forEach(e => out.push({
+        icon: EXP_ICONS[e.cat] || "💰", title: e.note || e.cat, sub: (e.type === "income" ? "Income " : "Expense ") + money(e.amount) + " · " + fmtDate(e.date),
+        run: () => { expMonth = e.date.slice(0, 7); go("expenses"); renderExpenses(); }
+    }));
+    return out.concat(views).slice(0, 24);
+}
+
+function renderSearch() {
+    searchList = buildSearch($("#searchInput").value);
+    if (searchSel >= searchList.length) searchSel = Math.max(0, searchList.length - 1);
+    $("#searchResults").replaceChildren(...(searchList.length
+        ? searchList.map((r, i) => h("li", {
+            class: i === searchSel ? "sel" : "", role: "option", "aria-selected": i === searchSel ? "true" : "false",
+            onmousemove: () => { if (searchSel !== i) { searchSel = i; markSearch(); } },
+            onclick: () => runSearch(i)
+        }, h("span", { class: "r-ico", text: r.icon }), h("div", { class: "r-main" }, h("div", { class: "r-title", text: r.title }), h("div", { class: "r-sub", text: r.sub }))))
+        : [h("li", { class: "r-none", text: "Nothing found. Try a different word." })]));
+}
+
+function markSearch() {
+    $$("#searchResults li").forEach((li, i) => {
+        li.classList.toggle("sel", i === searchSel);
+        li.setAttribute("aria-selected", i === searchSel ? "true" : "false");
+    });
+    const el = $$("#searchResults li")[searchSel];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+}
+
+function openSearch() {
+    searchReturn = document.activeElement;
+    $("#searchModal").hidden = false;
+    $("#searchInput").value = "";
+    searchSel = 0;
+    renderSearch();
+    $("#searchInput").focus();
+}
+
+function closeSearch() {
+    $("#searchInput").blur();
+    $("#searchModal").hidden = true;
+    if (searchReturn && searchReturn !== document.body && searchReturn.focus) { try { searchReturn.focus(); } catch {} }
+}
+
+function runSearch(i) {
+    const r = searchList[i];
+    if (!r) return;
+    closeSearch();
+    r.run();
+}
+
+$("#searchBtn").addEventListener("click", openSearch);
+$("#searchInput").addEventListener("input", () => { searchSel = 0; renderSearch(); });
+$("#searchInput").addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { e.preventDefault(); if (searchList.length) { searchSel = (searchSel + 1) % searchList.length; markSearch(); } }
+    else if (e.key === "ArrowUp") { e.preventDefault(); if (searchList.length) { searchSel = (searchSel - 1 + searchList.length) % searchList.length; markSearch(); } }
+    else if (e.key === "Enter") { e.preventDefault(); runSearch(searchSel); }
+    else if (e.key === "Escape") { e.preventDefault(); closeSearch(); }
+});
+$("#searchModal").addEventListener("mousedown", e => { if (e.target === $("#searchModal")) closeSearch(); });
+document.addEventListener("keydown", e => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || "")) || e.target.isContentEditable;
+    if (!$("#tourModal").hidden) return;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); if ($("#searchModal").hidden) openSearch(); else closeSearch(); }
+    else if (e.key === "/" && !typing && $("#searchModal").hidden) { e.preventDefault(); openSearch(); }
+    else if (e.key === "Escape" && !$("#searchModal").hidden) closeSearch();
+});
+
+/* ============ Calendar ============ */
+let calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let calSel = todayStr();
+
+function renderCalendar() {
+    const y = calMonth.getFullYear(), m = calMonth.getMonth();
+    $("#calTitle").textContent = calMonth.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    $("#calDow").replaceChildren(...["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => h("div", { text: d })));
+    const offset = (new Date(y, m, 1).getDay() + 6) % 7;
+    const count = new Date(y, m + 1, 0).getDate();
+    const today = todayStr();
+    const cells = [];
+    for (let i = 0; i < offset; i++) cells.push(h("div", {}));
+    for (let d = 1; d <= count; d++) {
+        const key = dayKey(new Date(y, m, d));
+        const tk = tasks.filter(t => t.due === key).length;
+        const rm = reminders.filter(r => r.at.slice(0, 10) === key).length;
+        const hb = habits.filter(x => x.days.includes(key)).length;
+        const sp = expenses.some(e => e.type === "expense" && e.date === key);
+        const parts = [];
+        if (tk) parts.push(tk + (tk === 1 ? " task" : " tasks"));
+        if (rm) parts.push(rm + (rm === 1 ? " reminder" : " reminders"));
+        if (hb) parts.push(hb + (hb === 1 ? " habit done" : " habits done"));
+        if (sp) parts.push("spending");
+        cells.push(h("button", {
+            type: "button", class: "cal-day" + (key === today ? " today" : "") + (key === calSel ? " sel" : ""),
+            "aria-pressed": key === calSel ? "true" : "false",
+            "aria-label": new Date(y, m, d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) + (parts.length ? ": " + parts.join(", ") : ""),
+            onclick: () => { calSel = key; renderCalendar(); }
+        }, h("span", { text: String(d) }),
+            h("span", { class: "dots" }, ...[tk ? "t" : "", rm ? "r" : "", hb ? "h" : "", sp ? "m" : ""].filter(Boolean).map(c => h("i", { class: "d " + c })))));
+    }
+    $("#calGrid").replaceChildren(...cells);
+    renderCalDay();
+}
+
+function renderCalDay() {
+    const key = calSel;
+    const dt = new Date(key + "T00:00:00");
+    const box = $("#calDay");
+    const dayTasks = tasks.filter(t => t.due === key);
+    const dayRems = reminders.filter(r => r.at.slice(0, 10) === key).sort((a, b) => remTime(a) - remTime(b));
+    const doneHabits = habits.filter(x => x.days.includes(key));
+    const dayExp = expenses.filter(e => e.date === key);
+    const spent = dayExp.filter(e => e.type === "expense").reduce((a, e) => a + e.amount, 0);
+    const sec = (title, items, empty) => h("div", { class: "cal-sec" }, h("h4", { text: title }),
+        items.length ? h("ul", {}, ...items) : h("small", { text: empty }));
+
+    const form = h("form", { class: "inline", style: "margin-top:16px" },
+        h("input", { id: "calNewTask", required: true, maxlength: "200", placeholder: "Add a task for this day…", "aria-label": "New task for this day" }),
+        h("button", { class: "btn primary", type: "submit", text: "Add" }));
+    form.addEventListener("submit", e => {
+        e.preventDefault();
+        const text = form.querySelector("input").value.trim();
+        if (!text) return;
+        tasks.push({ id: uid(), text: text.slice(0, 200), done: false, priority: "medium", due: key, repeat: "", spawned: false });
+        saveTasks();
+        renderCalendar();
+        toast("Task added for " + fmtDate(key));
+    });
+
+    box.replaceChildren(
+        h("h3", { style: "margin:0", text: isNaN(dt) ? "" : dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + (key === todayStr() ? " · Today" : "") }),
+        sec("Tasks due", dayTasks.map(t => h("li", { class: t.done ? "done" : "" },
+            h("input", { type: "checkbox", checked: !!t.done, "aria-label": "Mark done", onchange: e => { completeTask(t, e.target.checked); renderCalendar(); } }),
+            h("span", { class: "sp", text: t.text }),
+            h("span", { class: "badge " + (t.priority || "medium"), text: t.priority || "medium" }))), "No tasks due."),
+        sec("Reminders", dayRems.map(r => h("li", {},
+            h("span", { text: r.fired ? "✅" : "⏰" }),
+            h("span", { class: "sp", text: r.text }),
+            h("span", { class: "badge", text: new Date(r.at).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }) }))), "No reminders."),
+        sec("Habits done", doneHabits.map(x => h("li", {}, h("span", { text: x.icon }), h("span", { class: "sp", text: x.name }))), "No habits ticked."),
+        sec("Money" + (spent ? " · spent " + money(spent) : ""), dayExp.map(e => h("li", {},
+            h("span", { text: EXP_ICONS[e.cat] || "💰" }),
+            h("span", { class: "sp", text: e.note || e.cat }),
+            h("span", { class: "badge", text: (e.type === "income" ? "+" : "−") + money(e.amount) }))), "No transactions."),
+        form);
+}
+
+$("#calPrev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); renderCalendar(); });
+$("#calNext").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1); renderCalendar(); });
+$("#calToday").addEventListener("click", () => {
+    const n = new Date();
+    calMonth = new Date(n.getFullYear(), n.getMonth(), 1);
+    calSel = todayStr();
+    renderCalendar();
+});
+
+/* ============ Welcome tour ============ */
+const TOUR = [
+    { ico: "👋", title: "Welcome to Nexora", text: "Your everyday digital workspace: tasks, notes, habits, money and more in one place. Here is a 30-second tour." },
+    { ico: "🔍", title: "Find anything fast", text: "Press Ctrl+K (or tap Search at the top) to search all your tasks, notes, habits and expenses, or jump to any page." },
+    { ico: "👤", title: "Save your details once", text: "Smart Profile keeps your name, email and phone ready to copy. Your CV and messages use them automatically." },
+    { ico: "✅", title: "Stay on track", text: "Tasks can repeat every day, week or month. Reminders alert you on time, and Habits build streaks day by day." },
+    { ico: "💰", title: "Know where money goes", text: "Track expenses, set a monthly budget and see charts of your spending by category and by month." },
+    { ico: "☁️", title: "Use it everywhere", text: "Sign in with Google in Settings to sync your data between your phone and laptop. You can also install Nexora as an app." }
+];
+let tourStep = 0;
+
+function renderTour() {
+    const st = TOUR[tourStep];
+    $("#tourIco").textContent = st.ico;
+    $("#tourTitle").textContent = st.title;
+    $("#tourText").textContent = st.text;
+    $("#tourDots").replaceChildren(...TOUR.map((_, i) => h("i", { class: i === tourStep ? "on" : "" })));
+    $("#tourBack").hidden = tourStep === 0;
+    $("#tourSkip").hidden = tourStep === TOUR.length - 1;
+    $("#tourNext").textContent = tourStep === TOUR.length - 1 ? "Let's go" : "Next";
+}
+
+function openTour() {
+    tourStep = 0;
+    renderTour();
+    $("#tourModal").hidden = false;
+    $("#tourNext").focus();
+}
+
+function closeTour() {
+    $("#tourModal").hidden = true;
+    try { localStorage.setItem("nexoraTourDone", "1"); } catch {}
+}
+
+$("#tourNext").addEventListener("click", () => {
+    if (tourStep >= TOUR.length - 1) { closeTour(); return; }
+    tourStep++;
+    renderTour();
+});
+$("#tourBack").addEventListener("click", () => { if (tourStep > 0) { tourStep--; renderTour(); } });
+$("#tourSkip").addEventListener("click", closeTour);
+$("#tourBtn").addEventListener("click", openTour);
+document.addEventListener("keydown", e => {
+    if ($("#tourModal").hidden) return;
+    if (e.key === "Escape") { e.preventDefault(); closeTour(); }
+    else if (e.key === "ArrowRight") { $("#tourNext").click(); }
+    else if (e.key === "ArrowLeft") { $("#tourBack").click(); }
+});
+
+/* ============ Cloud sync (Firebase) ============ */
+/* Paste your Firebase web app details here (they are public identifiers, not secrets). */
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyAaq4KiO3HbFtD_YmQWneaqclQr-88UA1U",
+    authDomain: "nexora-52bad.firebaseapp.com",
+    projectId: "nexora-52bad",
+    storageBucket: "nexora-52bad.firebasestorage.app",
+    messagingSenderId: "274918941735",
+    appId: "1:274918941735:web:59f5bbc636ac105f469a02"
+};
+const FB_VER = "10.12.2";
+const cloudConfigured = Object.values(FIREBASE_CONFIG).every(v => typeof v === "string" && v && !v.startsWith("PASTE"));
+
+const deviceId = (() => {
+    try {
+        let v = localStorage.getItem("nexoraDevice");
+        if (!v) { v = uid(); localStorage.setItem("nexoraDevice", v); }
+        return v;
+    } catch { return uid(); }
+})();
+function getMod() { return Number(localStorage.getItem("nexoraMod")) || 0; }
+function setMod(n) { try { localStorage.setItem("nexoraMod", String(n)); } catch {} }
+
+function markModified() {
+    setMod(Date.now());
+    scheduleSync();
+}
+
+function scheduleSync() {
+    if (!cloudUser || syncApplying) return;
+    clearTimeout(syncTimer);
+    cloudState = "pending";
+    renderSync();
+    syncTimer = setTimeout(pushNow, 2500);
+}
+
+function cloudError(err, fallback) {
+    const c = String((err && err.code) || "");
+    if (c.includes("permission")) return "The online database refused the request. Check the Firestore rules in Firebase.";
+    if (c.includes("unavailable") || c.includes("network")) return "Can't reach the online service. Sync will continue when you are online.";
+    return fallback;
+}
+
+async function pushNow() {
+    clearTimeout(syncTimer);
+    if (!cloudUser || !fb) return;
+    if (!navigator.onLine) { cloudState = "offline-in"; renderSync(); return; }
+    const json = JSON.stringify(snapshot());
+    if (json.length > 900000) { cloudState = "error"; cloudMsg = "Your data is too large to sync online (over 900 KB). Remove some notes or old entries."; renderSync(); return; }
+    let updated = getMod();
+    if (!updated) { updated = Date.now(); setMod(updated); }
+    cloudState = "syncing";
+    renderSync();
+    try {
+        await fb.fs.setDoc(fb.fs.doc(fb.db, "users", cloudUser.uid), { data: json, updated, device: deviceId });
+        if (getMod() === updated) { lastSynced = Date.now(); cloudState = "in"; }
+    } catch (err) {
+        cloudState = "error";
+        cloudMsg = cloudError(err, "Could not save online. Try Sync now.");
+    }
+    renderSync();
+}
+
+function parseRemote(d) {
+    try {
+        const data = JSON.parse(d.data);
+        if (!data || data.app !== "nexora") return null;
+        return { data, updated: Number(d.updated) || 0, device: String(d.device || "") };
+    } catch { return null; }
+}
+
+function pullRemote(remote) {
+    syncApplying = true;
+    try {
+        applyData(remote.data, false);
+        setMod(remote.updated);
+        lastSynced = Date.now();
+        cloudState = "in";
+        if (remote.device !== deviceId) toast("Synced from your other device ✔");
+    } catch {
+        cloudState = "error";
+        cloudMsg = "Could not read the online data.";
+    } finally {
+        syncApplying = false;
+    }
+    renderSync();
+}
+
+function handleSnap(snap, user) {
+    if (!cloudUser || cloudUser.uid !== user.uid) return;
+    const remote = snap.exists() ? parseRemote(snap.data()) : null;
+    const mod = getMod();
+    const linked = localStorage.getItem("nexoraSyncUid") === user.uid;
+    const link = () => { try { localStorage.setItem("nexoraSyncUid", user.uid); } catch {} };
+    if (!remote) { link(); pushNow(); return; }
+    if (!linked && mod > 0) {
+        const useOnline = confirm("This account already has Nexora data online.\n\nOK = load the online data on this device (replaces the data here)\nCancel = keep the data on this device and replace the online copy");
+        link();
+        if (useOnline) pullRemote(remote); else { markModified(); pushNow(); }
+        return;
+    }
+    link();
+    if (remote.updated > mod) pullRemote(remote);
+    else if (mod > remote.updated) pushNow();
+    else { lastSynced = Date.now(); cloudState = "in"; renderSync(); }
+}
+
+function onCloudUser(user) {
+    if (cloudUnsub) { cloudUnsub(); cloudUnsub = null; }
+    clearTimeout(syncTimer);
+    cloudUser = user;
+    if (!user) { cloudState = "out"; renderSync(); return; }
+    cloudState = "syncing";
+    renderSync();
+    cloudUnsub = fb.fs.onSnapshot(fb.fs.doc(fb.db, "users", user.uid),
+        snap => handleSnap(snap, user),
+        err => { cloudState = "error"; cloudMsg = cloudError(err, "Could not connect to the online database."); renderSync(); });
+}
+
+async function initCloud() {
+    if (!cloudConfigured) { cloudState = "off"; renderSync(); return; }
+    if (fb) return;
+    cloudState = "loading";
+    renderSync();
+    try {
+        const base = "https://www.gstatic.com/firebasejs/" + FB_VER + "/";
+        const [app, auth, fs] = await Promise.all([
+            import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")]);
+        const a = app.initializeApp(FIREBASE_CONFIG);
+        fb = { auth, fs, authInst: auth.getAuth(a), db: fs.getFirestore(a) };
+        auth.onAuthStateChanged(fb.authInst, onCloudUser, () => { cloudState = "offline"; renderSync(); });
+    } catch {
+        fb = null;
+        cloudState = "offline";
+        renderSync();
+    }
+}
+
+function renderSync() {
+    const t = $("#syncText"), bi = $("#syncIn"), bn = $("#syncNow"), bo = $("#syncOut");
+    if (!t) return;
+    const signedIn = !!cloudUser;
+    bi.hidden = cloudState === "off" || cloudState === "loading" || cloudState === "offline" || signedIn;
+    bn.hidden = !signedIn;
+    bo.hidden = !signedIn;
+    const who = signedIn ? (cloudUser.email || "your account") : "";
+    const time = lastSynced ? new Date(lastSynced).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }) : "";
+    t.textContent =
+        cloudState === "off" ? "Online sync is not set up yet."
+        : cloudState === "loading" ? "Connecting…"
+        : cloudState === "offline" ? "Can't reach the online service right now. Your data is safe on this device, and you can sign in once you are back online."
+        : cloudState === "out" ? "Sign in to keep your data safe online and use Nexora on your phone and laptop with the same data."
+        : cloudState === "error" ? cloudMsg
+        : cloudState === "offline-in" ? "Signed in as " + who + ". You are offline. Changes will sync when you are back online."
+        : cloudState === "syncing" || cloudState === "pending" ? "Signed in as " + who + ". Saving…"
+        : "Signed in as " + who + ". All changes are saved online ✔" + (time ? " (" + time + ")" : "");
+}
+
+$("#syncIn").addEventListener("click", async () => {
+    if (!fb) { await initCloud(); if (!fb) return; }
+    try {
+        await fb.auth.signInWithPopup(fb.authInst, new fb.auth.GoogleAuthProvider());
+    } catch (err) {
+        const c = String((err && err.code) || "");
+        if (c.includes("popup-closed") || c.includes("cancelled")) return;
+        toast(c.includes("unauthorized-domain") ? "Add this website to Authorized domains in Firebase" : c.includes("popup-blocked") ? "Allow pop-ups for this site and try again" : "Sign in failed. Try again.");
+    }
+});
+$("#syncNow").addEventListener("click", () => { markModified(); pushNow(); });
+$("#syncOut").addEventListener("click", async () => {
+    if (!confirm("Sign out? Your data stays on this device, but it will stop syncing.")) return;
+    try { await fb.auth.signOut(fb.authInst); } catch {}
+});
+window.addEventListener("online", () => {
+    if (!fb) initCloud();
+    else if (cloudUser) pushNow();
+});
+window.addEventListener("offline", () => { if (cloudUser) { cloudState = "offline-in"; renderSync(); } });
+
+/* ============ Init ============ */
+function refreshAll() {
+    buildProfileForm();
+    buildCVForm();
+    renderExpenses();
+    renderHabits();
+    renderReminders();
+    renderCalendar();
+    buildDemo();
+    renderProfileMeter();
+    renderTasks();
+    renderNotes();
+    renderSessions();
+    renderDashboard();
+    generateMessage();
+}
+
+$("#dateChip").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+
+buildProfileForm();
+buildDemo();
+buildWriter();
+buildCVForm();
+fillExpCats();
+renderExpenses();
+renderHabits();
+renderReminders();
+checkReminders();
+setInterval(checkReminders, 15000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkReminders(); });
+renderTasks();
+renderNotes();
+renderTimer();
+renderSessions();
+go(location.hash.slice(1) || "dashboard");
+renderSync();
+applyCurrency();
+initCloud();
+try { if (!localStorage.getItem("nexoraTourDone")) setTimeout(openTour, 700); } catch {}
+
+/* ============ Install as app (PWA) ============ */
+let installEvent = null;
+const isStandalone = () =>
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+function updateInstallCard() {
+    const btn = $("#installBtn"), txt = $("#installText");
+    if (isStandalone()) {
+        txt.textContent = "Nexora is installed and running as an app. ✔";
+        btn.hidden = true;
+    } else if (installEvent) {
+        txt.textContent = "Install Nexora as an app on this device. It opens in its own window and works offline.";
+        btn.hidden = false;
+    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        txt.textContent = "On iPhone or iPad: tap the Share button in Safari, then choose \"Add to Home Screen\".";
+    } else {
+        txt.textContent = "To install: open the browser menu (⋮) and choose \"Install app\" or \"Add to Home screen\". If you do not see it yet, reload the page once.";
+    }
+}
+
+window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    installEvent = e;
+    updateInstallCard();
+});
+
+window.addEventListener("appinstalled", () => {
+    installEvent = null;
+    toast("Nexora installed 🎉");
+    updateInstallCard();
+});
+
+$("#installBtn").addEventListener("click", async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    try { await installEvent.userChoice; } catch { /* ignore */ }
+    installEvent = null;
+    $("#installBtn").hidden = true;
+});
+
+updateInstallCard();
+
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => { /* offline support is optional */ });
+    });
+}
+</script>
+</body>
+</html>
