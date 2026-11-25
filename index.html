@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nexora">
+<meta property="og:title" content="Nexora - Smart Digital Workspace">
+<meta property="og:description" content="Tasks, habits, reminders, expenses, notes, CV builder and more, all in one beautiful workspace. Works offline and syncs across devices.">
+<meta property="og:url" content="https://hafsasaeed1280-sys.github.io/nexora/">
+<meta property="og:image" content="https://hafsasaeed1280-sys.github.io/nexora/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nexora - Smart Digital Workspace">
+<meta name="twitter:description" content="Tasks, habits, reminders, expenses, notes, CV builder and more, all in one beautiful workspace.">
+<meta name="twitter:image" content="https://hafsasaeed1280-sys.github.io/nexora/og-image.png">
 <meta name="theme-color" content="#0b0b12">
 <meta name="description" content="Nexora - your smart digital workspace for profiles, tasks, notes, messages and focus.">
 <title>Nexora | Smart Digital Workspace</title>
@@ -1328,6 +1340,14 @@ kbd {
                 </div>
             </div>
             <div class="card">
+                <h2>Share Nexora</h2>
+                <p>Show Nexora to a friend or family member. They can open it in any browser and install it too.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="shareBtn" type="button">Share Nexora</button>
+                    <button class="btn" id="copyLinkBtn" type="button">Copy link</button>
+                </div>
+            </div>
+            <div class="card">
                 <h2>Appearance</h2>
                 <p>Choose how Nexora looks.</p>
                 <div class="row" style="margin-top:0">
@@ -2243,6 +2263,20 @@ function applyData(d, withTheme) {
     store.set("nexoraSessions", d.sessions && typeof d.sessions === "object" && !Array.isArray(d.sessions) ? d.sessions : {});
     if (withTheme) applyTheme(d.theme === "light" ? "light" : "dark");
     refreshAll();
+}
+
+const SHARE_URL = "https://hafsasaeed1280-sys.github.io/nexora/";
+$("#shareBtn").addEventListener("click", async () => {
+    const data = { title: "Nexora - Smart Digital Workspace", text: "Check out Nexora, a smart digital workspace I built: tasks, habits, reminders, expenses, notes and more.", url: SHARE_URL };
+    try {
+        if (navigator.share) { await navigator.share(data); return; }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    copyShareLink();
+});
+$("#copyLinkBtn").addEventListener("click", copyShareLink);
+async function copyShareLink() {
+    try { await navigator.clipboard.writeText(SHARE_URL); toast("Link copied ✔"); }
+    catch (e) { window.prompt("Copy this link:", SHARE_URL); }
 }
 
 $("#exportBtn").addEventListener("click", () => {
