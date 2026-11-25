@@ -141,7 +141,11 @@ body::before {
     transition: background .15s, color .15s;
 }
 
-.nav-btn .ic { font-size: 1.15rem; width: 24px; text-align: center; }
+.nav-btn .ic { width: 24px; display: inline-flex; align-items: center; justify-content: center; }
+.nav-btn .ic svg, .more-grid button span svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav-btn.active .ic svg { stroke: var(--accent); }
+.more-grid button span svg { width: 22px; height: 22px; }
+.more-btn .ic svg { fill: currentColor; stroke: none; }
 .nav-btn:hover { background: var(--card2); color: var(--text); }
 
 .nav-btn.active {
@@ -804,37 +808,37 @@ kbd {
     <aside class="sidebar" aria-label="Main navigation">
         <div class="brand"><div class="logo"><svg viewBox="110 100 292 292" width="26" height="26" aria-hidden="true"><path d="M176 352V166L336 352V166" fill="none" stroke="#fff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/><circle cx="336" cy="150" r="40" fill="#fbbf24"/></svg></div><span class="brand-text">Nexora<small>Smart Workspace</small></span></div>
         <nav class="nav-scroll">
-        <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span><span class="lb">Dashboard</span></button>
+        <button class="nav-btn" data-view="dashboard"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span><span class="lb">Dashboard</span></button>
         <div class="nav-group">Plan</div>
-        <button class="nav-btn" data-view="tasks"><span class="ic">✅</span><span class="lb">Tasks</span></button>
-        <button class="nav-btn mob-hide" data-view="reminders"><span class="ic">⏰</span><span class="lb">Reminders</span></button>
-        <button class="nav-btn" data-view="calendar"><span class="ic">📅</span><span class="lb">Calendar</span></button>
-        <button class="nav-btn mob-hide" data-view="focus"><span class="ic">⏱️</span><span class="lb">Focus</span></button>
+        <button class="nav-btn" data-view="tasks"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="lb">Tasks</span></button>
+        <button class="nav-btn mob-hide" data-view="reminders"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="lb">Reminders</span></button>
+        <button class="nav-btn" data-view="calendar"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="lb">Calendar</span></button>
+        <button class="nav-btn mob-hide" data-view="focus"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span><span class="lb">Focus</span></button>
         <div class="nav-group">Life</div>
-        <button class="nav-btn" data-view="habits"><span class="ic">🔥</span><span class="lb">Habits</span></button>
-        <button class="nav-btn mob-hide" data-view="expenses"><span class="ic">💰</span><span class="lb">Expenses</span></button>
-        <button class="nav-btn mob-hide" data-view="notes"><span class="ic">📝</span><span class="lb">Notes</span></button>
+        <button class="nav-btn" data-view="habits"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span><span class="lb">Habits</span></button>
+        <button class="nav-btn mob-hide" data-view="expenses"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span><span class="lb">Expenses</span></button>
+        <button class="nav-btn mob-hide" data-view="notes"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></svg></span><span class="lb">Notes</span></button>
         <div class="nav-group">Career</div>
-        <button class="nav-btn mob-hide" data-view="profile"><span class="ic">👤</span><span class="lb">Smart Profile</span></button>
-        <button class="nav-btn mob-hide" data-view="cv"><span class="ic">📄</span><span class="lb">CV Builder</span></button>
-        <button class="nav-btn mob-hide" data-view="writer"><span class="ic">✉️</span><span class="lb">Writer</span></button>
+        <button class="nav-btn mob-hide" data-view="profile"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="lb">Smart Profile</span></button>
+        <button class="nav-btn mob-hide" data-view="cv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><span class="lb">CV Builder</span></button>
+        <button class="nav-btn mob-hide" data-view="writer"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span><span class="lb">Writer</span></button>
         </nav>
-        <button class="nav-btn mob-hide" data-view="settings"><span class="ic">⚙️</span><span class="lb">Settings</span></button>
-        <button class="nav-btn more-btn" id="moreBtn" type="button" aria-haspopup="true" aria-expanded="false"><span class="ic">⋯</span><span class="lb">More</span></button>
+        <button class="nav-btn mob-hide" data-view="settings"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg></span><span class="lb">Settings</span></button>
+        <button class="nav-btn more-btn" id="moreBtn" type="button" aria-haspopup="true" aria-expanded="false"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></span><span class="lb">More</span></button>
         <div class="side-foot">© 2026 Nexora<br>Made with ❤️</div>
     </aside>
 
 
     <div class="more-sheet" id="moreSheet" hidden>
         <div class="more-grid">
-            <button data-view="reminders"><span>⏰</span>Reminders</button>
-            <button data-view="focus"><span>⏱️</span>Focus</button>
-            <button data-view="expenses"><span>💰</span>Expenses</button>
-            <button data-view="notes"><span>📝</span>Notes</button>
-            <button data-view="profile"><span>👤</span>Profile</button>
-            <button data-view="cv"><span>📄</span>CV Builder</button>
-            <button data-view="writer"><span>✉️</span>Writer</button>
-            <button data-view="settings"><span>⚙️</span>Settings</button>
+            <button data-view="reminders"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>Reminders</button>
+            <button data-view="focus"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></span>Focus</button>
+            <button data-view="expenses"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span>Expenses</button>
+            <button data-view="notes"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></svg></span>Notes</button>
+            <button data-view="profile"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profile</button>
+            <button data-view="cv"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>CV Builder</button>
+            <button data-view="writer"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>Writer</button>
+            <button data-view="settings"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg></span>Settings</button>
         </div>
     </div>
 
