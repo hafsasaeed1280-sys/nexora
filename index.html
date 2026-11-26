@@ -797,6 +797,27 @@ kbd {
 
 /* ---------- Print (CV) ---------- */
 @page { margin: 12mm; }
+.ver { font-size: .72rem; color: var(--muted); opacity: .75; }
+#printReport { display: none; }
+@media print {
+    body.print-report { background: #fff !important; }
+    body.print-report .app, body.print-report .modal { display: none !important; }
+    body.print-report #printReport { display: block; color: #111; font-family: Inter, "Segoe UI", Arial, sans-serif; padding: 8px 4px; }
+    .pr-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #7c3aed; padding-bottom: 10px; margin-bottom: 18px; }
+    .pr-head h1 { margin: 0; font-size: 1.6rem; color: #111; }
+    .pr-head small { color: #666; }
+    .pr-sum { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .pr-sum div { border: 1px solid #ddd; border-radius: 8px; padding: 10px; }
+    .pr-sum b { display: block; font-size: 1.15rem; margin-top: 2px; }
+    .pr-sum span { font-size: .72rem; color: #666; text-transform: uppercase; letter-spacing: .5px; }
+    #printReport h2 { font-size: 1.05rem; margin: 18px 0 8px; color: #4c1d95; }
+    #printReport table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    #printReport th { text-align: left; background: #f3f0ff; }
+    #printReport th, #printReport td { padding: 6px 8px; border-bottom: 1px solid #e5e5e5; }
+    #printReport td.r, #printReport th.r { text-align: right; }
+    #printReport tr { break-inside: avoid; }
+    .pr-foot { margin-top: 22px; font-size: .72rem; color: #888; text-align: center; }
+}
 @media print {
     body { background: #fff; }
     .app { display: block; }
@@ -837,7 +858,7 @@ kbd {
         </nav>
         <button class="nav-btn mob-hide" data-view="settings"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg></span><span class="lb">Settings</span></button>
         <button class="nav-btn more-btn" id="moreBtn" type="button" aria-haspopup="true" aria-expanded="false"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></span><span class="lb">More</span></button>
-        <div class="side-foot">© 2026 Nexora<br>Made with ❤️</div>
+        <div class="side-foot">© 2026 Nexora<br>Made with ❤️<br><span id="appVer" class="ver"></span></div>
     </aside>
 
 
@@ -1118,6 +1139,7 @@ kbd {
                     <input id="expMonth" type="month" style="width:auto">
                 </div>
                 <button class="btn" id="expCsv" type="button">Download CSV</button>
+                <button class="btn" id="expPdf" type="button">Report (PDF)</button>
             </div>
 
             <div class="stats" id="expStats"></div>
@@ -1388,6 +1410,7 @@ kbd {
             <div class="card">
                 <h2>About Nexora</h2>
                 <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, reminders, online sync, quick search (Ctrl+K), a calendar, a habit tracker and focus stats, an expense tracker with a budget, a CV builder, a message writer and a focus timer, all in one place.</p>
+                <p class="ver" style="margin:10px 0 0" id="aboutVer"></p>
             </div>
         </section>
     <div class="modal tour" id="tourModal" hidden>
@@ -2669,6 +2692,45 @@ $("#expCsv").addEventListener("click", () => {
     toast("CSV downloaded");
 });
 
+const APP_VERSION = "1.16";
+$("#appVer").textContent = "Version " + APP_VERSION;
+$("#aboutVer").textContent = "Version " + APP_VERSION + " · Built by Hafsa";
+
+$("#expPdf").addEventListener("click", () => {
+    const items = expenses.filter(e => e.date.slice(0, 7) === expMonth).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    if (!items.length) { toast("Nothing to report for this month"); return; }
+    const spent = items.filter(e => e.type === "expense"), earned = items.filter(e => e.type === "income");
+    const tSpent = spent.reduce((a, e) => a + e.amount, 0), tIn = earned.reduce((a, e) => a + e.amount, 0);
+    const by = {};
+    spent.forEach(e => { by[e.cat] = (by[e.cat] || 0) + e.amount; });
+    const cats = Object.entries(by).sort((a, b) => b[1] - a[1]);
+    const [y, m] = expMonth.split("-").map(Number);
+    const label = new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    const box = (l, v) => h("div", {}, h("span", { text: l }), h("b", { text: v }));
+    const tbl = (head, rows, rightFrom) => h("table", {},
+        h("thead", {}, h("tr", {}, ...head.map((t, i) => h("th", { class: i >= rightFrom ? "r" : "", text: t })))),
+        h("tbody", {}, ...rows.map(r => h("tr", {}, ...r.map((t, i) => h("td", { class: i >= rightFrom ? "r" : "", text: t }))))));
+    const root = $("#printReport");
+    root.replaceChildren(
+        h("div", { class: "pr-head" },
+            h("div", {}, h("h1", { text: "Expense report" }), h("small", { text: label })),
+            h("small", { text: "Nexora · Smart Workspace" })),
+        h("div", { class: "pr-sum" },
+            box("Spent", money(tSpent)), box("Income", money(tIn)),
+            box("Balance", money(tIn - tSpent)),
+            box("Budget", budget ? money(budget) + " (" + Math.round(tSpent / budget * 100) + "% used)" : "Not set")),
+        h("h2", { text: "By category" }),
+        cats.length ? tbl(["Category", "Share", "Amount"], cats.map(([c, v]) => [c, Math.round(v / tSpent * 100) + "%", money(v)]), 1) : h("p", { text: "No expenses this month." }),
+        h("h2", { text: "All transactions" }),
+        tbl(["Date", "Type", "Category", "Note", "Amount"], items.map(e => [e.date, e.type, e.cat, e.note || "", money(e.amount)]), 4),
+        h("div", { class: "pr-foot", text: "Generated by Nexora on " + new Date().toLocaleDateString() }));
+    document.body.classList.add("print-report");
+    const done = () => { document.body.classList.remove("print-report"); window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    toast("Choose 'Save as PDF' in the print window");
+    setTimeout(() => window.print(), 250);
+});
+
 $("#expDate").value = todayStr();
 
 /* ============ Budget ============ */
@@ -3450,5 +3512,6 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
     });
 }
 </script>
+<div id="printReport" aria-hidden="true"></div>
 </body>
 </html>
