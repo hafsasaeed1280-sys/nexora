@@ -2,6 +2,8 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'">
+<script>try{if(localStorage.getItem("nexoraPin"))document.documentElement.classList.add("locked")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Nexora">
@@ -797,6 +799,19 @@ kbd {
 
 /* ---------- Print (CV) ---------- */
 @page { margin: 12mm; }
+/* ---------- PIN lock ---------- */
+#lockScreen { display: none; position: fixed; inset: 0; z-index: 10000; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(800px 500px at 70% 20%, rgba(124,58,237,.28), transparent 60%), var(--bg); }
+html.locked #lockScreen { display: flex; }
+html.locked body { overflow: hidden; }
+.lock-box { width: min(340px, 100%); text-align: center; }
+.lock-box .logo-big { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 20px; background: linear-gradient(135deg, #8b5cf6, #3b82f6); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 40px rgba(124,58,237,.4); }
+.lock-box .logo-big svg { width: 46px; height: 46px; }
+.lock-box h2 { margin: 0 0 4px; }
+.lock-box input { text-align: center; letter-spacing: .5em; font-size: 1.3rem; margin-top: 14px; }
+.lock-msg { min-height: 1.3em; margin: 8px 0 0; font-size: .85rem; color: var(--danger); }
+.lock-link { background: none; border: 0; color: var(--muted); font-size: .8rem; margin-top: 18px; cursor: pointer; text-decoration: underline; }
+.pin-panel { display: grid; gap: 8px; max-width: 320px; margin-top: 12px; }
+.pin-panel[hidden] { display: none; }
 .ver { font-size: .72rem; color: var(--muted); opacity: .75; }
 #printReport { display: none; }
 @media print {
@@ -836,6 +851,17 @@ kbd {
 </head>
 
 <body>
+<div id="lockScreen" role="dialog" aria-modal="true" aria-label="Nexora is locked">
+    <form class="lock-box" id="lockForm" autocomplete="off">
+        <div class="logo-big"><svg viewBox="110 100 292 292" aria-hidden="true"><path d="M176 352V166L336 352V166" fill="none" stroke="#fff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/><circle cx="336" cy="150" r="40" fill="#fbbf24"/></svg></div>
+        <h2>Nexora is locked</h2>
+        <p style="margin:0">Enter your PIN to continue.</p>
+        <input id="lockPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-label="PIN">
+        <div class="lock-msg" id="lockMsg" role="alert"></div>
+        <button class="btn primary" type="submit" style="width:100%;margin-top:6px">Unlock</button>
+        <button class="lock-link" id="lockForgot" type="button">Forgot PIN?</button>
+    </form>
+</div>
 <div class="app">
 
     <aside class="sidebar" aria-label="Main navigation">
@@ -1396,6 +1422,34 @@ kbd {
                     <button class="btn" id="syncNow" type="button" hidden>Sync now</button>
                     <button class="btn" id="syncOut" type="button" hidden>Sign out</button>
                 </div>
+            </div>
+            <div class="card">
+                <h2>Security</h2>
+                <p id="pinStatus">Lock Nexora with a PIN so nobody can open it on this device while you are away.</p>
+                <div class="row" style="margin-top:0">
+                    <button class="btn primary" id="pinSet" type="button">Set PIN</button>
+                    <button class="btn" id="pinChange" type="button" hidden>Change PIN</button>
+                    <button class="btn" id="pinLockNow" type="button" hidden>Lock now</button>
+                    <button class="btn danger" id="pinRemove" type="button" hidden>Remove PIN</button>
+                </div>
+                <form class="pin-panel" id="pinPanel" hidden autocomplete="off">
+                    <input id="pinCur" type="password" inputmode="numeric" maxlength="8" placeholder="Current PIN" aria-label="Current PIN" hidden>
+                    <input id="pinNew" type="password" inputmode="numeric" maxlength="8" placeholder="New PIN (4 to 8 digits)" aria-label="New PIN">
+                    <input id="pinNew2" type="password" inputmode="numeric" maxlength="8" placeholder="Repeat new PIN" aria-label="Repeat new PIN">
+                    <div class="inline"><button class="btn primary" type="submit">Save</button><button class="btn" id="pinCancel" type="button">Cancel</button></div>
+                    <small id="pinMsg" style="color:var(--danger)"></small>
+                </form>
+                <div id="autoLockRow" style="margin-top:14px" hidden>
+                    <label for="autoLock">Auto-lock after being idle</label>
+                    <select id="autoLock" style="width:auto">
+                        <option value="1">1 minute</option>
+                        <option value="5">5 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="0">Never</option>
+                    </select>
+                </div>
+                <p style="margin:14px 0 0;font-size:.82rem"><small>The PIN keeps casual eyes out on this device. It is stored only here (never uploaded), and your account is protected separately by Google sign-in.</small></p>
             </div>
             <div class="card">
                 <h2>Your data</h2>
@@ -2692,7 +2746,7 @@ $("#expCsv").addEventListener("click", () => {
     toast("CSV downloaded");
 });
 
-const APP_VERSION = "1.17";
+const APP_VERSION = "1.18";
 $("#appVer").textContent = "Version " + APP_VERSION;
 $("#aboutVer").textContent = "Version " + APP_VERSION + " · Built by Hafsa";
 
@@ -3463,6 +3517,124 @@ renderSync();
 applyCurrency();
 initCloud();
 try { if (!localStorage.getItem("nexoraTourDone")) setTimeout(openTour, 700); } catch {}
+
+/* ============ Security: PIN lock ============ */
+const PIN_KEY = "nexoraPin", AL_KEY = "nexoraAutoLock";
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+async function pinHash(pin, salt) {
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
+    return b64(await crypto.subtle.deriveBits({ name: "PBKDF2", salt: unb64(salt), iterations: 150000, hash: "SHA-256" }, key, 256));
+}
+function getPin() {
+    try { const o = JSON.parse(localStorage.getItem(PIN_KEY)); return o && typeof o.salt === "string" && typeof o.hash === "string" ? o : null; } catch { return null; }
+}
+function getAutoLock() {
+    try { const v = Number(localStorage.getItem(AL_KEY)); return [0, 1, 5, 15, 60].includes(v) && localStorage.getItem(AL_KEY) !== null ? v : 5; } catch { return 5; }
+}
+let isLocked = false, lastActive = Date.now(), failCount = 0, lockUntil = 0;
+function lockApp() {
+    if (!getPin()) return;
+    isLocked = true;
+    document.documentElement.classList.add("locked");
+    $(".app").inert = true;
+    $("#lockPin").value = ""; $("#lockMsg").textContent = "";
+    setTimeout(() => $("#lockPin").focus(), 60);
+}
+function unlockApp() {
+    isLocked = false;
+    document.documentElement.classList.remove("locked");
+    $(".app").inert = false;
+    lastActive = Date.now();
+}
+$("#lockForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const msg = $("#lockMsg"), p = getPin();
+    if (!p) { unlockApp(); return; }
+    if (Date.now() < lockUntil) { msg.textContent = "Too many attempts. Please wait a few seconds."; return; }
+    const pin = $("#lockPin").value;
+    if (!/^\d{4,8}$/.test(pin)) { msg.textContent = "Enter your 4 to 8 digit PIN."; return; }
+    let ok = false;
+    try { ok = (await pinHash(pin, p.salt)) === p.hash; } catch {}
+    if (ok) { failCount = 0; unlockApp(); return; }
+    failCount++;
+    $("#lockPin").value = "";
+    if (failCount >= 5) { failCount = 0; lockUntil = Date.now() + 30000; msg.textContent = "Too many wrong tries. Wait 30 seconds."; }
+    else msg.textContent = "Wrong PIN. Try again.";
+});
+$("#lockForgot").addEventListener("click", () => {
+    if (!confirm("Forgot your PIN?\n\nThis removes the PIN and erases Nexora data on THIS device only. If you are signed in with Google, your online copy stays safe and comes back when you sign in again. Without sign-in, the data is lost.\n\nContinue?")) return;
+    try {
+        SYNC_KEYS.concat([PIN_KEY, "nexoraMod", "nexoraSyncUid"]).forEach(k => localStorage.removeItem(k));
+    } catch {}
+    location.reload();
+});
+["pointerdown", "keydown", "scroll", "touchstart"].forEach(ev => document.addEventListener(ev, () => { if (!isLocked) lastActive = Date.now(); }, { passive: true, capture: true }));
+function checkIdle() {
+    const mins = getAutoLock();
+    if (!isLocked && getPin() && mins > 0 && Date.now() - lastActive > mins * 60000) lockApp();
+}
+setInterval(checkIdle, 10000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkIdle(); });
+
+function renderSecurity() {
+    const has = !!getPin();
+    $("#pinStatus").textContent = has
+        ? "PIN lock is ON. Nexora asks for your PIN when you open it and after being idle."
+        : "Lock Nexora with a PIN so nobody can open it on this device while you are away.";
+    $("#pinSet").hidden = has;
+    $("#pinChange").hidden = !has;
+    $("#pinLockNow").hidden = !has;
+    $("#pinRemove").hidden = !has;
+    $("#autoLockRow").hidden = !has;
+    $("#autoLock").value = String(getAutoLock());
+}
+let pinMode = "set";
+function openPinPanel(mode) {
+    pinMode = mode;
+    const panel = $("#pinPanel");
+    panel.hidden = false;
+    $("#pinCur").hidden = mode === "set";
+    $("#pinNew").hidden = mode === "remove";
+    $("#pinNew2").hidden = mode === "remove";
+    ["#pinCur", "#pinNew", "#pinNew2"].forEach(i => { $(i).value = ""; });
+    $("#pinMsg").textContent = "";
+    (mode === "set" ? $("#pinNew") : $("#pinCur")).focus();
+}
+function closePinPanel() { $("#pinPanel").hidden = true; }
+if (!(window.crypto && crypto.subtle)) {
+    $("#pinSet").disabled = true;
+    $("#pinStatus").textContent = "PIN lock needs a secure (https) connection and is not available here.";
+}
+$("#pinSet").addEventListener("click", () => openPinPanel("set"));
+$("#pinChange").addEventListener("click", () => openPinPanel("change"));
+$("#pinRemove").addEventListener("click", () => openPinPanel("remove"));
+$("#pinCancel").addEventListener("click", closePinPanel);
+$("#pinLockNow").addEventListener("click", lockApp);
+$("#autoLock").addEventListener("change", e => { try { localStorage.setItem(AL_KEY, e.target.value); } catch {} toast("Auto-lock updated"); });
+$("#pinPanel").addEventListener("submit", async e => {
+    e.preventDefault();
+    const msg = $("#pinMsg"), cur = getPin();
+    if (pinMode !== "set") {
+        let ok = false;
+        try { ok = cur && (await pinHash($("#pinCur").value, cur.salt)) === cur.hash; } catch {}
+        if (!ok) { msg.textContent = "Current PIN is wrong."; return; }
+    }
+    if (pinMode === "remove") {
+        try { localStorage.removeItem(PIN_KEY); } catch {}
+        closePinPanel(); renderSecurity(); toast("PIN removed"); return;
+    }
+    const a = $("#pinNew").value, b = $("#pinNew2").value;
+    if (!/^\d{4,8}$/.test(a)) { msg.textContent = "Use 4 to 8 digits only."; return; }
+    if (a !== b) { msg.textContent = "The two PINs do not match."; return; }
+    try {
+        const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+        localStorage.setItem(PIN_KEY, JSON.stringify({ salt, hash: await pinHash(a, salt) }));
+    } catch { msg.textContent = "Could not save the PIN on this device."; return; }
+    closePinPanel(); renderSecurity(); toast(pinMode === "set" ? "PIN lock is on" : "PIN changed");
+});
+renderSecurity();
+if (getPin()) lockApp(); else document.documentElement.classList.remove("locked");
 
 /* ============ Install as app (PWA) ============ */
 let installEvent = null;
