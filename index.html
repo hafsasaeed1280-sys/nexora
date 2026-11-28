@@ -819,6 +819,9 @@ html.locked body { overflow: hidden; }
 .review-grid small { color: var(--muted); }
 .review-grid .up { color: var(--danger); } .review-grid .down { color: #22c55e; }
 @media (max-width: 520px) { .review-grid { grid-template-columns: 1fr; } }
+.backup-strip { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 16px; margin-bottom: 14px; border: 1px solid rgba(251,191,36,.45); background: rgba(251,191,36,.08); border-radius: 12px; font-size: .9rem; }
+.backup-strip[hidden] { display: none; }
+.backup-strip .inline { gap: 8px; }
 .ver { font-size: .72rem; color: var(--muted); opacity: .75; }
 #printReport { display: none; }
 @media print {
@@ -919,6 +922,7 @@ html.locked body { overflow: hidden; }
 
         <!-- Dashboard -->
         <section class="view" id="view-dashboard">
+            <div class="backup-strip" id="backupStrip" hidden></div>
             <div class="card hero">
                 <div>
                     <h1 id="greet">Welcome</h1>
@@ -1461,6 +1465,7 @@ html.locked body { overflow: hidden; }
             <div class="card">
                 <h2>Your data</h2>
                 <p>Your data lives in this browser, and in your private online account if you sign in above. A backup file is still a good extra copy.</p>
+                <p id="lastBackup" style="font-size:.85rem"></p>
                 <div class="row" style="margin-top:0">
                     <button class="btn primary" id="exportBtn" type="button">Download backup</button>
                     <button class="btn" id="importBtn" type="button">Restore from backup</button>
@@ -2382,6 +2387,8 @@ $("#exportBtn").addEventListener("click", () => {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    try { localStorage.setItem("nexoraLastBackup", todayStr()); } catch {}
+    renderBackupInfo();
     toast("Backup downloaded");
 });
 
@@ -2764,7 +2771,7 @@ $("#expCsv").addEventListener("click", () => {
     toast("CSV downloaded");
 });
 
-const APP_VERSION = "1.19";
+const APP_VERSION = "1.20";
 $("#appVer").textContent = "Version " + APP_VERSION;
 $("#aboutVer").textContent = "Version " + APP_VERSION + " · Built by Hafsa";
 
@@ -3535,6 +3542,34 @@ renderSync();
 applyCurrency();
 initCloud();
 try { if (!localStorage.getItem("nexoraTourDone")) setTimeout(openTour, 700); } catch {}
+
+/* ============ Backup reminder ============ */
+const dayDiff = (a, b) => Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000);
+const lsGet = k => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+if (!lsGet("nexoraBackupStart")) lsSet("nexoraBackupStart", todayStr());
+function renderBackupInfo() {
+    const last = lsGet("nexoraLastBackup");
+    const el = $("#lastBackup");
+    if (el) el.textContent = last ? "Last backup: " + fmtDate(last) : "You have not downloaded a backup yet.";
+    const strip = $("#backupStrip");
+    if (!strip) return;
+    const hasData = tasks.length || notes.length || expenses.length || habits.length;
+    const base = last || lsGet("nexoraBackupStart") || todayStr();
+    const age = dayDiff(base, todayStr());
+    const snooze = lsGet("nexoraBackupSnooze");
+    const snoozed = snooze && dayDiff(todayStr(), snooze) > 0;
+    if (!hasData || age < 14 || snoozed) { strip.hidden = true; return; }
+    strip.replaceChildren(
+        h("span", { text: "💾 " + (last ? "It has been " + age + " days since your last backup." : "You have not saved a backup yet.") + " A copy keeps your data safe."}),
+        h("div", { class: "inline" },
+            h("button", { class: "btn primary", type: "button", style: "padding:6px 12px", text: "Download backup", onclick: () => $("#exportBtn").click() }),
+            h("button", { class: "btn", type: "button", style: "padding:6px 12px", text: "Later", onclick: () => {
+                const d = new Date(); d.setDate(d.getDate() + 3); lsSet("nexoraBackupSnooze", dayKey(d)); renderBackupInfo();
+            } })));
+    strip.hidden = false;
+}
+renderBackupInfo();
 
 /* ============ Weekly review ============ */
 function buildReview() {
