@@ -1,5 +1,5 @@
 /* Nexora service worker: makes the app load offline */
-const CACHE = "nexora-v22";
+const CACHE = "nexora-v23";
 const FILES = [
   "./",
   "./index.html",

@@ -859,6 +859,11 @@ html.locked .fab { display: none; }
 .keys-grid div { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
 kbd { background: var(--card2); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; font: 600 .78rem inherit; }
 @media (max-width: 520px) { .badge-grid { grid-template-columns: repeat(2, 1fr); } .keys-grid { grid-template-columns: 1fr; } }
+.undo-bar { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 10002; display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 18px; border-radius: 999px; background: var(--text); color: var(--bg); box-shadow: 0 10px 30px rgba(0,0,0,.4); font-size: .9rem; max-width: calc(100vw - 32px); }
+.undo-bar[hidden] { display: none; }
+.undo-bar button { border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 700; cursor: pointer; color: #fff; background: var(--accent); }
+@media (max-width: 860px) { .undo-bar { bottom: 82px; } }
+@media print { .undo-bar { display: none !important; } }
 .ver { font-size: .72rem; color: var(--muted); opacity: .75; }
 #printReport { display: none; }
 @media print {
@@ -898,6 +903,7 @@ kbd { background: var(--card2); border: 1px solid var(--border); border-bottom-w
 </head>
 
 <body>
+<div class="undo-bar" id="undoBar" role="status" aria-live="polite" hidden><span id="undoMsg"></span><button type="button" id="undoBtn">Undo</button></div>
 <div class="modal" id="badgeModal" hidden>
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="badgeTitle" style="padding:20px">
         <div class="inline" style="justify-content:space-between">
@@ -2003,7 +2009,7 @@ function renderTasks() {
                 }),
                 h("button", {
                     class: "btn small danger", type: "button", text: "Remove",
-                    onclick: () => { tasks = tasks.filter(x => x.id !== t.id); saveTasks(); renderTasks(); }
+                    onclick: () => { const i = tasks.findIndex(x => x.id === t.id), item = tasks[i]; tasks = tasks.filter(x => x.id !== t.id); saveTasks(); renderTasks(); renderDashboard(); offerUndo("Task deleted", () => { tasks.splice(Math.min(i, tasks.length), 0, item); saveTasks(); renderTasks(); renderDashboard(); }); }
                 }));
         }));
     }
@@ -2163,10 +2169,11 @@ function renderNotes() {
                 h("button", {
                     class: "btn small danger", type: "button", text: "Delete",
                     onclick: () => {
-                        if (!confirm("Delete this note?")) return;
+                        const i = notes.findIndex(x => x.id === n.id), item = notes[i];
                         notes = notes.filter(x => x.id !== n.id);
                         saveNotes();
                         renderNotes();
+                        offerUndo("Note deleted", () => { notes.splice(Math.min(i, notes.length), 0, item); saveNotes(); renderNotes(); });
                     }
                 })))
     ));
@@ -2818,7 +2825,7 @@ function renderExpenses() {
                 h("strong", { text: (isInc ? "+" : "−") + money(e.amount), style: "white-space:nowrap;color:" + (isInc ? "var(--ok)" : "var(--danger)") }),
                 h("button", {
                     class: "btn small danger", type: "button", text: "Delete",
-                    onclick: () => { expenses = expenses.filter(x => x.id !== e.id); saveExpenses(); renderExpenses(); toast("Deleted"); }
+                    onclick: () => { const i = expenses.findIndex(x => x.id === e.id), item = expenses[i]; expenses = expenses.filter(x => x.id !== e.id); saveExpenses(); renderExpenses(); renderDashboard(); offerUndo("Expense deleted", () => { expenses.splice(Math.min(i, expenses.length), 0, item); saveExpenses(); renderExpenses(); renderDashboard(); }); }
                 }));
         })
         : [h("li", { class: "empty" }, h("span", { class: "big", text: "💸" }), "Nothing here yet. Add your first entry above.")]));
@@ -2869,7 +2876,7 @@ $("#expCsv").addEventListener("click", () => {
     toast("CSV downloaded");
 });
 
-const APP_VERSION = "1.22";
+const APP_VERSION = "1.23";
 $("#appVer").textContent = "Version " + APP_VERSION;
 $("#aboutVer").textContent = "Version " + APP_VERSION + " · Built by Hafsa";
 
@@ -3034,10 +3041,12 @@ function renderHabits() {
                 h("button", {
                     class: "btn small danger", type: "button", text: "Delete",
                     onclick: () => {
-                        if (!confirm("Delete this habit and its history?")) return;
+                        const i = habits.findIndex(x => x.id === hb.id), item = habits[i];
                         habits = habits.filter(x => x.id !== hb.id);
                         saveHabits();
                         renderHabits();
+                        renderDashboard();
+                        offerUndo("Habit deleted", () => { habits.splice(Math.min(i, habits.length), 0, item); saveHabits(); renderHabits(); renderDashboard(); });
                     }
                 })),
             h("div", { class: "habit-meta" },
@@ -3114,7 +3123,7 @@ function renderReminders() {
                 h("div", { class: "t-meta" }, h("span", { class: "badge" + (!late && remTime(r) < now ? " overdue" : ""), text: fmtRem(r) }))),
             h("button", {
                 class: "btn small danger", type: "button", text: "Remove",
-                onclick: () => { reminders = reminders.filter(x => x.id !== r.id); saveReminders(); renderReminders(); }
+                onclick: () => { const i = reminders.findIndex(x => x.id === r.id), item = reminders[i]; reminders = reminders.filter(x => x.id !== r.id); saveReminders(); renderReminders(); renderDashboard(); offerUndo("Reminder deleted", () => { reminders.splice(Math.min(i, reminders.length), 0, item); saveReminders(); renderReminders(); renderDashboard(); }); }
             }));
     }) : [h("li", { class: "empty" }, h("span", { class: "big", text: "⏰" }), "No reminders yet. Add one above.")]));
 }
@@ -3640,6 +3649,18 @@ renderSync();
 applyCurrency();
 initCloud();
 try { if (!localStorage.getItem("nexoraTourDone")) setTimeout(openTour, 700); } catch {}
+
+/* ============ Undo for deletes ============ */
+let undoFn = null, undoTimer = 0;
+function offerUndo(msg, fn) {
+    undoFn = fn;
+    $("#undoMsg").textContent = msg;
+    $("#undoBar").hidden = false;
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(hideUndo, 7000);
+}
+function hideUndo() { undoFn = null; $("#undoBar").hidden = true; clearTimeout(undoTimer); }
+$("#undoBtn").addEventListener("click", () => { const f = undoFn; hideUndo(); if (f) { f(); toast("Restored ✔"); } });
 
 /* ============ Accent colour ============ */
 const ACCENTS = {
