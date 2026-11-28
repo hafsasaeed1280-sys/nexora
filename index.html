@@ -846,6 +846,19 @@ html.locked body { overflow: hidden; }
 @media print { .fab, .burst { display: none !important; } }
 html.locked .fab { display: none; }
 @media (max-width: 860px) { .fab { bottom: 82px; right: 16px; width: 50px; height: 50px; } }
+.insight { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(var(--accent-rgb), .12); font-size: .88rem; }
+.insight[hidden] { display: none; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; max-height: 60vh; overflow-y: auto; }
+.badge { text-align: center; padding: 14px 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--card2); }
+.badge .bi { font-size: 1.9rem; display: block; }
+.badge b { display: block; font-size: .85rem; margin-top: 4px; }
+.badge small { color: var(--muted); font-size: .72rem; line-height: 1.25; display: block; margin-top: 2px; }
+.badge.locked { opacity: .45; filter: grayscale(1); }
+.badge.got { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .4) inset; }
+.keys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; margin-top: 16px; font-size: .9rem; }
+.keys-grid div { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+kbd { background: var(--card2); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; font: 600 .78rem inherit; }
+@media (max-width: 520px) { .badge-grid { grid-template-columns: repeat(2, 1fr); } .keys-grid { grid-template-columns: 1fr; } }
 .ver { font-size: .72rem; color: var(--muted); opacity: .75; }
 #printReport { display: none; }
 @media print {
@@ -885,6 +898,24 @@ html.locked .fab { display: none; }
 </head>
 
 <body>
+<div class="modal" id="badgeModal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="badgeTitle" style="padding:20px">
+        <div class="inline" style="justify-content:space-between">
+            <div><h2 id="badgeTitle" style="margin:0">Achievements</h2><small id="badgeSub"></small></div>
+            <button class="btn" id="badgeClose" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="badge-grid" id="badgeGrid"></div>
+    </div>
+</div>
+<div class="modal" id="keysModal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="keysTitle" style="padding:20px">
+        <div class="inline" style="justify-content:space-between">
+            <h2 id="keysTitle" style="margin:0">Keyboard shortcuts</h2>
+            <button class="btn" id="keysClose" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="keys-grid" id="keysGrid"></div>
+    </div>
+</div>
 <button class="fab" id="fab" type="button" aria-label="Quick add" title="Quick add (N)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 <div class="modal" id="quickModal" hidden>
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="quickTitle" style="padding:20px">
@@ -1001,7 +1032,7 @@ html.locked .fab { display: none; }
 
             <div class="dash-grid">
                 <div class="card dash-week">
-                    <div class="inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><h3 style="margin:0 0 2px">This week</h3><button class="btn" id="reviewBtn" type="button" style="padding:6px 12px">Weekly review</button></div>
+                    <div class="inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><h3 style="margin:0 0 2px">This week</h3><div class="inline"><button class="btn" id="badgeBtn" type="button" style="padding:6px 12px">🏆 <span id="badgeCount">0</span></button><button class="btn" id="reviewBtn" type="button" style="padding:6px 12px">Weekly review</button></div></div>
                     <p style="margin:0 0 6px">Your last 7 days at a glance.</p>
                     <div class="week-pair">
                         <div>
@@ -1026,6 +1057,7 @@ html.locked .fab { display: none; }
                     <div class="card">
                         <h3>Up next</h3>
                         <ul class="mini-list" id="upNext"></ul>
+                        <p id="insight" class="insight" hidden></p>
                         <p id="profileTip" style="margin:10px 0 0;font-size:.85rem"></p>
                     </div>
                 </div>
@@ -1540,7 +1572,7 @@ html.locked .fab { display: none; }
             </div>
             <div class="card">
                 <h2>About Nexora</h2>
-                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, reminders, online sync, quick search (Ctrl+K), a calendar, a habit tracker and focus stats, an expense tracker with a budget, a CV builder, a message writer and a focus timer, all in one place.</p>
+                <p style="margin:0">Nexora is a smart digital workspace: reusable profile, tasks, notes, reminders, online sync, quick search (Ctrl+K), a calendar, a habit tracker and focus stats, an expense tracker with a budget, a CV builder, a message writer and a focus timer, all in one place. Press <kbd>?</kbd> any time to see keyboard shortcuts.</p>
                 <p class="ver" style="margin:10px 0 0" id="aboutVer"></p>
             </div>
         </section>
@@ -2837,7 +2869,7 @@ $("#expCsv").addEventListener("click", () => {
     toast("CSV downloaded");
 });
 
-const APP_VERSION = "1.21";
+const APP_VERSION = "1.22";
 $("#appVer").textContent = "Version " + APP_VERSION;
 $("#aboutVer").textContent = "Version " + APP_VERSION + " · Built by Hafsa";
 
@@ -3885,6 +3917,134 @@ $("#pinPanel").addEventListener("submit", async e => {
 });
 renderSecurity();
 if (getPin()) lockApp(); else document.documentElement.classList.remove("locked");
+
+/* ============ Achievements ============ */
+function maxStreak(days) {
+    const u = Array.from(new Set(days)).sort();
+    let best = 0, run = 0, prev = "";
+    u.forEach(d => { run = prev && dayDiff(prev, d) === 1 ? run + 1 : 1; prev = d; if (run > best) best = run; });
+    return best;
+}
+const totalFocus = () => Object.values(getSessions()).reduce((a, v) => a + (Number(v) || 0), 0);
+const BADGES = [
+    { id: "task1", icon: "✅", name: "First step", desc: "Complete your first task", test: () => tasks.some(t => t.done) },
+    { id: "task10", icon: "🏁", name: "Getting things done", desc: "Complete 10 tasks", test: () => tasks.filter(t => t.done).length >= 10 },
+    { id: "habit1", icon: "🌱", name: "Habit seed", desc: "Start your first habit", test: () => habits.length > 0 },
+    { id: "streak7", icon: "🔥", name: "One week strong", desc: "Keep a habit for 7 days in a row", test: () => habits.some(x => maxStreak(x.days) >= 7) },
+    { id: "streak30", icon: "🏆", name: "Unstoppable", desc: "Keep a habit for 30 days in a row", test: () => habits.some(x => maxStreak(x.days) >= 30) },
+    { id: "note1", icon: "📝", name: "Thinker", desc: "Save your first note", test: () => notes.length > 0 },
+    { id: "note10", icon: "📚", name: "Notebook", desc: "Save 10 notes", test: () => notes.length >= 10 },
+    { id: "exp1", icon: "💰", name: "Money aware", desc: "Track your first expense", test: () => expenses.length > 0 },
+    { id: "budget", icon: "🎯", name: "Budget planner", desc: "Set a monthly budget", test: () => budget > 0 },
+    { id: "focus5", icon: "⏱️", name: "Deep focus", desc: "Finish 5 focus sessions", test: () => totalFocus() >= 5 },
+    { id: "backup", icon: "💾", name: "Safe and sound", desc: "Download a backup", test: () => !!lsGet("nexoraLastBackup") },
+    { id: "pin", icon: "🔐", name: "Locked in", desc: "Turn on PIN lock", test: () => !!getPin() },
+    { id: "cloud", icon: "☁️", name: "Everywhere", desc: "Sign in to sync your data", test: () => !!lsGet("nexoraSyncUid") }
+];
+function unlockedBadges() { return BADGES.filter(b => { try { return b.test(); } catch { return false; } }); }
+function checkBadges() {
+    const got = unlockedBadges(), ids = got.map(b => b.id);
+    const raw = lsGet("nexoraBadges");
+    $("#badgeCount").textContent = got.length + "/" + BADGES.length;
+    if (!raw) { lsSet("nexoraBadges", JSON.stringify(ids)); return; }
+    let seen = [];
+    try { seen = JSON.parse(raw); } catch {}
+    if (!Array.isArray(seen)) seen = [];
+    const fresh = got.filter(b => !seen.includes(b.id));
+    if (fresh.length) {
+        lsSet("nexoraBadges", JSON.stringify(Array.from(new Set(seen.concat(ids)))));
+        toast("🏆 Badge unlocked: " + fresh[0].name);
+    }
+}
+function openBadges() {
+    const got = unlockedBadges().map(b => b.id);
+    $("#badgeSub").textContent = got.length + " of " + BADGES.length + " unlocked";
+    $("#badgeGrid").replaceChildren(...BADGES.map(b => h("div", { class: "badge " + (got.includes(b.id) ? "got" : "locked") },
+        h("span", { class: "bi", text: got.includes(b.id) ? b.icon : "🔒" }), h("b", { text: b.name }), h("small", { text: b.desc }))));
+    $("#badgeModal").hidden = false;
+    $("#badgeClose").focus();
+}
+function closeBadges() { $("#badgeModal").hidden = true; }
+$("#badgeBtn").addEventListener("click", openBadges);
+$("#badgeClose").addEventListener("click", closeBadges);
+$("#badgeModal").addEventListener("click", e => { if (e.target.id === "badgeModal") closeBadges(); });
+
+/* ============ Smart insights ============ */
+function buildInsights() {
+    const out = [], now = new Date(), today = todayStr();
+    const keysBack = (from, n) => Array.from({ length: n }, (_, i) => dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - from - i)));
+    const spend = keys => expenses.filter(e => e.type === "expense" && keys.includes(e.date)).reduce((a, e) => a + e.amount, 0);
+    const w1 = spend(keysBack(0, 7)), w0 = spend(keysBack(7, 7));
+    if (w1 > 0 && w0 > 0) {
+        const d = Math.round((w1 - w0) / w0 * 100);
+        if (d <= -5) out.push("You spent " + Math.abs(d) + "% less than last week. Nice control! 👏");
+        else if (d >= 5) out.push("You spent " + d + "% more than last week. Worth a look at Expenses.");
+    }
+    const month = today.slice(0, 7), mex = expenses.filter(e => e.type === "expense" && e.date.slice(0, 7) === month);
+    const tot = mex.reduce((a, e) => a + e.amount, 0);
+    if (tot > 0) {
+        const by = {}; mex.forEach(e => { by[e.cat] = (by[e.cat] || 0) + e.amount; });
+        const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+        out.push("Most of your spending this month is on " + top[0] + " (" + Math.round(top[1] / tot * 100) + "%).");
+    }
+    if (budget > 0 && tot > 0) {
+        const left = budget - tot;
+        out.push(left >= 0 ? "You have " + money(left) + " left in this month's budget." : "You are " + money(-left) + " over this month's budget.");
+    }
+    if (habits.length) {
+        const last14 = keysBack(0, 14);
+        const best = habits.map(x => ({ x, n: last14.filter(k => x.days.includes(k)).length })).sort((a, b) => b.n - a.n)[0];
+        if (best.n > 0) out.push("Your strongest habit is " + best.x.icon + " " + best.x.name + ": " + best.n + " of the last 14 days.");
+        const st = Math.max(...habits.map(x => maxStreak(x.days)));
+        if (st >= 3) out.push("Your longest habit streak so far is " + st + " days. Keep going! 🔥");
+    }
+    const doneWeek = tasks.filter(t => t.done && keysBack(0, 7).includes(t.doneAt)).length;
+    if (doneWeek > 0) out.push("You finished " + doneWeek + " task" + (doneWeek > 1 ? "s" : "") + " this week. 💪");
+    const late = tasks.filter(t => !t.done && t.due && t.due < today).length;
+    if (late > 0) out.push(late + " task" + (late > 1 ? "s are" : " is") + " overdue. One small step today clears the pile.");
+    return out;
+}
+function renderInsight() {
+    const el = $("#insight"), list = buildInsights();
+    if (!list.length) { el.hidden = true; return; }
+    const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    el.textContent = "💡 " + list[doy % list.length];
+    el.hidden = false;
+}
+const _renderDashboard = renderDashboard;
+renderDashboard = function () { _renderDashboard(); renderInsight(); checkBadges(); };
+renderInsight(); checkBadges();
+
+/* ============ Keyboard shortcuts ============ */
+const SHORTCUTS = [
+    ["N", "Quick add"], ["Ctrl + K  or  /", "Search"], ["?", "This help"], ["Esc", "Close a window"],
+    ["G then D", "Dashboard"], ["G then T", "Tasks"], ["G then R", "Reminders"], ["G then C", "Calendar"],
+    ["G then H", "Habits"], ["G then E", "Expenses"], ["G then N", "Notes"], ["G then F", "Focus"], ["G then S", "Settings"]
+];
+$("#keysGrid").replaceChildren(...SHORTCUTS.map(([k, t]) => h("div", {}, h("span", { text: t }), h("kbd", { text: k }))));
+const GOTO = { d: "dashboard", t: "tasks", r: "reminders", c: "calendar", h: "habits", e: "expenses", n: "notes", f: "focus", s: "settings" };
+let gPending = 0;
+const anyModalOpen = () => $$(".modal").some(m => !m.hidden);
+function openKeys() { $("#keysModal").hidden = false; $("#keysClose").focus(); }
+function closeKeys() { $("#keysModal").hidden = true; }
+$("#keysClose").addEventListener("click", closeKeys);
+$("#keysModal").addEventListener("click", e => { if (e.target.id === "keysModal") closeKeys(); });
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { if (!$("#badgeModal").hidden) closeBadges(); if (!$("#keysModal").hidden) closeKeys(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey || isLocked) return;
+    const t = e.target, tag = t && t.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+    const k = e.key.toLowerCase();
+    if (Date.now() < gPending) {
+        gPending = 0;
+        if (GOTO[k] && !anyModalOpen()) { e.preventDefault(); go(GOTO[k]); }
+        return;
+    }
+    if (anyModalOpen()) return;
+    if (e.key === "?") { e.preventDefault(); openKeys(); }
+    else if (k === "n") { e.preventDefault(); openQuick("task"); }
+    else if (k === "g") { gPending = Date.now() + 1200; }
+});
 
 /* ============ Install as app (PWA) ============ */
 let installEvent = null;
