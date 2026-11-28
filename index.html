@@ -37,6 +37,8 @@
     --muted: #a7a3bd;
     --accent: #8b5cf6;
     --accent2: #6366f1;
+    --accent-rgb: 139, 92, 246;
+    --accent2-rgb: 99, 102, 241;
     --ok: #22c55e;
     --warn: #f59e0b;
     --danger: #ef4444;
@@ -136,7 +138,7 @@ body::before {
     place-items: center;
     color: #fff;
     font-weight: 800;
-    box-shadow: 0 6px 18px rgba(139, 92, 246, .45);
+    box-shadow: 0 6px 18px rgba(var(--accent-rgb), .45);
 }
 
 .nav-btn {
@@ -163,7 +165,7 @@ body::before {
 .nav-btn:hover { background: var(--card2); color: var(--text); }
 
 .nav-btn.active {
-    background: linear-gradient(135deg, rgba(139, 92, 246, .25), rgba(99, 102, 241, .18));
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), .25), rgba(var(--accent2-rgb), .18));
     color: var(--text);
     font-weight: 600;
     box-shadow: inset 3px 0 0 var(--accent);
@@ -220,7 +222,7 @@ body::before {
 .grid2 .card { margin-bottom: 0; }
 
 .hero {
-    background: linear-gradient(135deg, rgba(139, 92, 246, .30), rgba(99, 102, 241, .14)), var(--card);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), .30), rgba(var(--accent2-rgb), .14)), var(--card);
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
@@ -293,7 +295,7 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, .22);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .22);
 }
 
 textarea { resize: vertical; min-height: 100px; }
@@ -822,6 +824,28 @@ html.locked body { overflow: hidden; }
 .backup-strip { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 16px; margin-bottom: 14px; border: 1px solid rgba(251,191,36,.45); background: rgba(251,191,36,.08); border-radius: 12px; font-size: .9rem; }
 .backup-strip[hidden] { display: none; }
 .backup-strip .inline { gap: 8px; }
+/* ---------- Quick add, accent, motion ---------- */
+.fab { position: fixed; right: 22px; bottom: 22px; z-index: 30; width: 54px; height: 54px; border-radius: 50%; border: 0; cursor: pointer; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: 0 10px 28px rgba(var(--accent-rgb), .5); display: flex; align-items: center; justify-content: center; transition: transform .18s ease, box-shadow .18s ease; }
+.fab:hover { transform: translateY(-2px) scale(1.05); }
+.fab:active { transform: scale(.94); }
+.fab svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.q-tabs { display: flex; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+.q-tabs .btn.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; }
+#quickForm [hidden] { display: none; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatch { width: 34px; height: 34px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; padding: 0; transition: transform .15s ease; }
+.swatch:hover { transform: scale(1.1); }
+.swatch[aria-checked="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg) inset; }
+.btn { transition: transform .12s ease, background .15s ease, border-color .15s ease; }
+.btn:active { transform: scale(.97); }
+.stat { transition: transform .18s ease, border-color .18s ease; }
+.stat:hover { transform: translateY(-2px); border-color: var(--accent); }
+.burst { position: fixed; z-index: 10001; pointer-events: none; font-size: 1.1rem; animation: burst .8s ease-out forwards; }
+@keyframes burst { from { opacity: 1; transform: translate(0, 0) scale(.6); } to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(var(--rot)); } }
+@media (prefers-reduced-motion: reduce) { .view, .fab, .btn, .stat, .swatch { animation: none !important; transition: none !important; } .burst { display: none; } }
+@media print { .fab, .burst { display: none !important; } }
+html.locked .fab { display: none; }
+@media (max-width: 860px) { .fab { bottom: 82px; right: 16px; width: 50px; height: 50px; } }
 .ver { font-size: .72rem; color: var(--muted); opacity: .75; }
 #printReport { display: none; }
 @media print {
@@ -861,6 +885,45 @@ html.locked body { overflow: hidden; }
 </head>
 
 <body>
+<button class="fab" id="fab" type="button" aria-label="Quick add" title="Quick add (N)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<div class="modal" id="quickModal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="quickTitle" style="padding:20px">
+        <div class="inline" style="justify-content:space-between">
+            <h2 id="quickTitle" style="margin:0">Quick add</h2>
+            <button class="btn" id="quickClose" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="q-tabs" id="quickTabs" role="tablist">
+            <button type="button" class="btn active" data-q="task" role="tab">✅ Task</button>
+            <button type="button" class="btn" data-q="note" role="tab">📝 Note</button>
+            <button type="button" class="btn" data-q="expense" role="tab">💰 Expense</button>
+        </div>
+        <form id="quickForm" autocomplete="off">
+            <div data-qp="task">
+                <label for="qTaskText">What needs to be done?</label>
+                <input id="qTaskText" maxlength="200" placeholder="e.g. Finish assignment">
+                <div class="row" style="margin-top:10px">
+                    <div style="flex:1;min-width:130px"><label for="qTaskPri">Priority</label><select id="qTaskPri"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+                    <div style="flex:1;min-width:130px"><label for="qTaskDue">Due (optional)</label><input id="qTaskDue" type="date"></div>
+                </div>
+            </div>
+            <div data-qp="note" hidden>
+                <label for="qNoteTitle">Title</label>
+                <input id="qNoteTitle" maxlength="80" placeholder="Note title">
+                <label for="qNoteBody" style="margin-top:10px;display:block">Note</label>
+                <textarea id="qNoteBody" rows="4" maxlength="4000" placeholder="Write something..."></textarea>
+            </div>
+            <div data-qp="expense" hidden>
+                <div class="row" style="margin-top:0">
+                    <div style="flex:1;min-width:120px"><label for="qExpAmt">Amount</label><input id="qExpAmt" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></div>
+                    <div style="flex:1;min-width:120px"><label for="qExpCat">Category</label><select id="qExpCat"></select></div>
+                </div>
+                <label for="qExpNote" style="margin-top:10px;display:block">Note (optional)</label>
+                <input id="qExpNote" maxlength="80" placeholder="e.g. lunch">
+            </div>
+            <button class="btn primary" type="submit" style="width:100%;margin-top:16px">Add</button>
+        </form>
+    </div>
+</div>
 <div id="lockScreen" role="dialog" aria-modal="true" aria-label="Nexora is locked">
     <form class="lock-box" id="lockForm" autocomplete="off">
         <div class="logo-big"><svg viewBox="110 100 292 292" aria-hidden="true"><path d="M176 352V166L336 352V166" fill="none" stroke="#fff" stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/><circle cx="336" cy="150" r="40" fill="#fbbf24"/></svg></div>
@@ -1413,6 +1476,8 @@ html.locked body { overflow: hidden; }
                     <button class="btn" id="themeDark" type="button">🌙 Dark</button>
                     <button class="btn" id="themeLight" type="button">☀️ Light</button>
                 </div>
+                <p style="margin:16px 0 8px">Accent colour</p>
+                <div class="swatches" id="accentSwatches" role="radiogroup" aria-label="Accent colour"></div>
             </div>
             <div class="card">
                 <h2>Preferences</h2>
@@ -1966,6 +2031,7 @@ function addToDate(str, repeat) {
 function completeTask(t, done) {
     t.done = done;
     t.doneAt = done ? todayStr() : "";
+    if (done && typeof burst === "function") burst();
     if (done && t.repeat && !t.spawned) {
         const today = todayStr();
         const base = t.due && t.due >= today ? t.due : today;
@@ -2771,7 +2837,7 @@ $("#expCsv").addEventListener("click", () => {
     toast("CSV downloaded");
 });
 
-const APP_VERSION = "1.20";
+const APP_VERSION = "1.21";
 $("#appVer").textContent = "Version " + APP_VERSION;
 $("#aboutVer").textContent = "Version " + APP_VERSION + " · Built by Hafsa";
 
@@ -3543,10 +3609,91 @@ applyCurrency();
 initCloud();
 try { if (!localStorage.getItem("nexoraTourDone")) setTimeout(openTour, 700); } catch {}
 
+/* ============ Accent colour ============ */
+const ACCENTS = {
+    purple: ["Purple", "#8b5cf6", "#6366f1", "139, 92, 246", "99, 102, 241"],
+    blue:   ["Blue",   "#3b82f6", "#2563eb", "59, 130, 246", "37, 99, 235"],
+    green:  ["Green",  "#10b981", "#059669", "16, 185, 129", "5, 150, 105"],
+    pink:   ["Pink",   "#ec4899", "#db2777", "236, 72, 153", "219, 39, 119"],
+    orange: ["Orange", "#f97316", "#ea580c", "249, 115, 22", "234, 88, 12"]
+};
+function currentAccent() { const a = lsGet("nexoraAccent"); return ACCENTS[a] ? a : "purple"; }
+function applyAccent(name) {
+    const a = ACCENTS[name] || ACCENTS.purple, r = document.documentElement.style;
+    r.setProperty("--accent", a[1]); r.setProperty("--accent2", a[2]);
+    r.setProperty("--accent-rgb", a[3]); r.setProperty("--accent2-rgb", a[4]);
+    $("#accentSwatches").replaceChildren(...Object.entries(ACCENTS).map(([k, v]) => h("button", {
+        class: "swatch", type: "button", role: "radio", title: v[0], "aria-label": v[0], "aria-checked": String(k === name),
+        style: "background:linear-gradient(135deg," + v[1] + "," + v[2] + ")",
+        onclick: () => { lsSet("nexoraAccent", k); applyAccent(k); toast(v[0] + " accent on"); }
+    })));
+}
+applyAccent(currentAccent());
+
+/* ============ Quick add ============ */
+let quickTab = "task";
+function setQuickTab(t) {
+    quickTab = t;
+    $$("#quickTabs .btn").forEach(b => { const on = b.dataset.q === t; b.classList.toggle("active", on); b.setAttribute("aria-selected", String(on)); });
+    $$("#quickForm [data-qp]").forEach(d => { d.hidden = d.dataset.qp !== t; });
+    const f = { task: "#qTaskText", note: "#qNoteTitle", expense: "#qExpAmt" }[t];
+    setTimeout(() => $(f).focus(), 30);
+}
+function openQuick(tab) {
+    if (isLocked) return;
+    $("#qExpCat").replaceChildren(...EXP_CATS.expense.map(c => h("option", { value: c, text: (EXP_ICONS[c] || "") + " " + c })));
+    $("#quickModal").hidden = false;
+    setQuickTab(tab || "task");
+}
+function closeQuick() { $("#quickModal").hidden = true; ["#qTaskText", "#qTaskDue", "#qNoteTitle", "#qNoteBody", "#qExpAmt", "#qExpNote"].forEach(i => { $(i).value = ""; }); }
+$("#fab").addEventListener("click", () => openQuick());
+$("#quickClose").addEventListener("click", closeQuick);
+$("#quickModal").addEventListener("click", e => { if (e.target.id === "quickModal") closeQuick(); });
+$("#quickTabs").addEventListener("click", e => { const b = e.target.closest("[data-q]"); if (b) setQuickTab(b.dataset.q); });
+$("#quickForm").addEventListener("submit", e => {
+    e.preventDefault();
+    if (quickTab === "task") {
+        const text = $("#qTaskText").value.trim();
+        if (!text) { toast("Write the task first"); return; }
+        const due = /^\d{4}-\d{2}-\d{2}$/.test($("#qTaskDue").value) ? $("#qTaskDue").value : "";
+        const pr = ["low", "medium", "high"].includes($("#qTaskPri").value) ? $("#qTaskPri").value : "medium";
+        tasks.push({ id: uid(), text: text.slice(0, 200), done: false, priority: pr, due, repeat: "", spawned: false });
+        saveTasks(); renderTasks(); renderCalendar(); toast("Task added ✅");
+    } else if (quickTab === "note") {
+        const title = $("#qNoteTitle").value.trim(), body = $("#qNoteBody").value.trim();
+        if (!title && !body) { toast("Write something first"); return; }
+        notes.unshift({ id: uid(), title: title.slice(0, 80), body: body.slice(0, 4000), date: Date.now(), pinned: false, color: "", tags: [] });
+        saveNotes(); renderNotes(); toast("Note saved 📝");
+    } else {
+        const amount = parseFloat($("#qExpAmt").value);
+        if (!Number.isFinite(amount) || amount <= 0 || amount >= 1e10) { toast("Enter a valid amount"); return; }
+        const cat = EXP_CATS.expense.includes($("#qExpCat").value) ? $("#qExpCat").value : "Other";
+        expenses.push({ id: uid(), type: "expense", amount: Math.round(amount * 100) / 100, cat, date: todayStr(), note: $("#qExpNote").value.trim().slice(0, 80) });
+        saveExpenses(); renderExpenses(); toast("Expense added 💰");
+    }
+    renderDashboard();
+    closeQuick();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#quickModal").hidden) closeQuick(); });
+
+/* ============ Celebration burst ============ */
+let lastPointer = { x: innerWidth / 2, y: innerHeight / 2 };
+document.addEventListener("pointerdown", e => { lastPointer = { x: e.clientX, y: e.clientY }; }, true);
+function burst() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const icons = ["✨", "🎉", "⭐", "💜"];
+    for (let i = 0; i < 9; i++) {
+        const a = (Math.PI * 2 * i) / 9 + Math.random() * .5, d = 40 + Math.random() * 40;
+        const el = h("span", { class: "burst", text: icons[i % icons.length], style: "left:" + lastPointer.x + "px;top:" + lastPointer.y + "px;--dx:" + Math.round(Math.cos(a) * d) + "px;--dy:" + Math.round(Math.sin(a) * d) + "px;--rot:" + Math.round(Math.random() * 120 - 60) + "deg" });
+        document.body.append(el);
+        setTimeout(() => el.remove(), 900);
+    }
+}
+
 /* ============ Backup reminder ============ */
 const dayDiff = (a, b) => Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000);
-const lsGet = k => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
-const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
 if (!lsGet("nexoraBackupStart")) lsSet("nexoraBackupStart", todayStr());
 function renderBackupInfo() {
     const last = lsGet("nexoraLastBackup");
